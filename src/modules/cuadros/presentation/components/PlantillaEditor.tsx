@@ -104,6 +104,8 @@ export function PlantillaEditor({
     const validItems = items.filter((item) => item.nombrePrenda.trim());
 
     const input = validItems.map((item) => ({
+      cuadroId,
+      genero,
       categoria: item.categoria,
       nombrePrenda: item.nombrePrenda.trim(),
       orden: item.orden,

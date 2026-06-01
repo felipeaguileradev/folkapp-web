@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         }
 
         pdfBuffer = await renderToBuffer(
-          createElement(InventarioReportPdf, { items: result.data }),
+          createElement(InventarioReportPdf, { items: result.data }) as any,
         );
         filename = "reporte-inventario.pdf";
         break;
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         }
 
         pdfBuffer = await renderToBuffer(
-          createElement(ListaComprasReportPdf, { items: result.data }),
+          createElement(ListaComprasReportPdf, { items: result.data }) as any,
         );
         filename = "lista-compras.pdf";
         break;
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         }
 
         pdfBuffer = await renderToBuffer(
-          createElement(FichaBailarinPdf, { ficha: result.data }),
+          createElement(FichaBailarinPdf, { ficha: result.data }) as any,
         );
         filename = `ficha-${result.data.nombreCompleto.replace(/\s+/g, "-").toLowerCase()}.pdf`;
         break;
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
         }
 
         pdfBuffer = await renderToBuffer(
-          createElement(EstadoCuadroReportPdf, { reporte: result.data }),
+          createElement(EstadoCuadroReportPdf, { reporte: result.data }) as any,
         );
         filename = `estado-cuadro-${result.data.cuadroNombre.toLowerCase()}.pdf`;
         break;
