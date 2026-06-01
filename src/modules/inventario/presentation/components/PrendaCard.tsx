@@ -1,0 +1,237 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Calendar,
+  MapPin,
+  Tag,
+  User,
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Separator } from "@/shared/components/ui/separator";
+import { cn } from "@/lib/utils";
+import type { Prenda } from "../../domain/entities";
+import type { EstadoPrenda } from "@/shared/types";
+import { eliminarPrendaAction } from "../../infrastructure/actions";
+import { PrendaFormDialog } from "./PrendaFormDialog";
+
+interface PrendaCardProps {
+  prenda: Prenda;
+}
+
+const ESTADO_STYLES: Record<EstadoPrenda, string> = {
+  Disponible: "bg-green-100 text-green-800 border-green-200",
+  "En uso": "bg-blue-100 text-blue-800 border-blue-200",
+  "En reparación": "bg-yellow-100 text-yellow-800 border-yellow-200",
+  Faltante: "bg-red-100 text-red-800 border-red-200",
+  Prestada: "bg-purple-100 text-purple-800 border-purple-200",
+  "Dada de baja": "bg-gray-100 text-gray-800 border-gray-200",
+};
+
+export function PrendaCard({ prenda }: PrendaCardProps) {
+  const router = useRouter();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirm("¿Estás seguro de que deseas eliminar esta prenda?")) return;
+
+    setIsDeleting(true);
+    const result = await eliminarPrendaAction(prenda.id);
+
+    if (result.success) {
+      router.push("/inventario");
+    } else {
+      alert(result.error);
+      setIsDeleting(false);
+    }
+  };
+
+  const handleEditSuccess = () => {
+    setIsEditOpen(false);
+    router.refresh();
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-4 mb-6">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/inventario">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver al inventario
+          </Link>
+        </Button>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Main info card */}
+        <Card className="md:col-span-2">
+          <CardHeader className="flex flex-row items-start justify-between">
+            <div>
+              <CardTitle className="text-xl">{prenda.nombre}</CardTitle>
+              <p className="text-sm text-muted-foreground font-mono mt-1">
+                {prenda.codigoIdentificador}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditOpen(true)}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Editar
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                {isDeleting ? "Eliminando..." : "Eliminar"}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="outline"
+                className={cn(ESTADO_STYLES[prenda.estado])}
+              >
+                {prenda.estado}
+              </Badge>
+              <Badge variant="secondary">{prenda.categoria}</Badge>
+              <Badge variant="secondary">{prenda.genero}</Badge>
+            </div>
+
+            <Separator />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <DetailItem
+                icon={<Tag className="h-4 w-4" />}
+                label="Propietario"
+                value={prenda.propietario}
+              />
+              <DetailItem
+                icon={<MapPin className="h-4 w-4" />}
+                label="Ubicación"
+                value={prenda.ubicacion ?? "Sin ubicación"}
+              />
+              <DetailItem
+                icon={<Calendar className="h-4 w-4" />}
+                label="Fecha de ingreso"
+                value={prenda.fechaIngreso.toLocaleDateString("es-CL")}
+              />
+              <DetailItem
+                icon={<User className="h-4 w-4" />}
+                label="Bailarín actual"
+                value={prenda.bailarinActualId ?? "Sin asignar"}
+              />
+            </div>
+
+            {prenda.color && (
+              <DetailItem
+                icon={<Tag className="h-4 w-4" />}
+                label="Color"
+                value={prenda.color}
+              />
+            )}
+
+            {prenda.tallaONumero && (
+              <DetailItem
+                icon={<Tag className="h-4 w-4" />}
+                label="Talla / Número"
+                value={prenda.tallaONumero}
+              />
+            )}
+
+            {prenda.identificadorFisico && (
+              <DetailItem
+                icon={<Tag className="h-4 w-4" />}
+                label="Identificador físico"
+                value={prenda.identificadorFisico}
+              />
+            )}
+
+            {prenda.comentarios && (
+              <>
+                <Separator />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">
+                    Comentarios
+                  </p>
+                  <p className="text-sm">{prenda.comentarios}</p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Image card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Foto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {prenda.fotoUrl ? (
+              <div className="relative aspect-square w-full overflow-hidden rounded-md">
+                <Image
+                  src={prenda.fotoUrl}
+                  alt={prenda.nombre}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex aspect-square w-full items-center justify-center rounded-md bg-muted">
+                <p className="text-sm text-muted-foreground">Sin foto</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Edit Dialog */}
+      <PrendaFormDialog
+        open={isEditOpen}
+        onOpenChange={setIsEditOpen}
+        onSuccess={handleEditSuccess}
+        prenda={prenda}
+      />
+    </>
+  );
+}
+
+function DetailItem({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className="text-muted-foreground mt-0.5">{icon}</span>
+      <div>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+        <p className="text-sm">{value}</p>
+      </div>
+    </div>
+  );
+}

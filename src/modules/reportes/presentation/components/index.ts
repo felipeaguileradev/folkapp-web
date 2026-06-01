@@ -1,0 +1,1 @@
+export { ReportesContent } from "./ReportesContent";

@@ -1,0 +1,9 @@
+export { InventarioContent } from "./InventarioContent";
+export { PrendaTable } from "./PrendaTable";
+export { PrendaSearchInput } from "./PrendaSearchInput";
+export { PrendaFiltersBar } from "./PrendaFiltersBar";
+export { PrendaPagination } from "./PrendaPagination";
+export { PrendaCard } from "./PrendaCard";
+export { PrendaForm } from "./PrendaForm";
+export { PrendaFormDialog } from "./PrendaFormDialog";
+export { ImageUploader } from "./ImageUploader";
