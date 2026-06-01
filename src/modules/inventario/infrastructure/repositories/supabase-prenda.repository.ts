@@ -196,8 +196,7 @@ export class SupabasePrendaRepository implements PrendaRepository {
 
   // --- Helpers privados ---
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private applyFilters<T extends { eq: (...args: any[]) => any }>(
+  private applyFilters<T extends { eq: (column: string, value: string) => T }>(
     query: T,
     filters: PrendaFilters,
   ): T {
