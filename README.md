@@ -29,11 +29,10 @@ cp .env.example .env
 
 Variables requeridas:
 
-| Variable                               | Descripción                          |
-| -------------------------------------- | ------------------------------------ |
-| `NEXT_PUBLIC_SUPABASE_URL`             | URL del proyecto Supabase            |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave pública (anon key)             |
-| `SUPABASE_SERVICE_ROLE_KEY`            | Clave de servicio (solo server-side) |
+| Variable                               | Descripción               |
+| -------------------------------------- | ------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | URL del proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Clave pública (anon key)  |
 
 Puedes encontrar estas credenciales en el Dashboard de Supabase → Settings → API.
 
@@ -127,7 +126,6 @@ Agrega las mismas variables del `.env` en Settings → Environment Variables:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
 
 ## Tecnologías
 
