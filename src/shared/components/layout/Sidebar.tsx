@@ -18,18 +18,51 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FEATURES, FeatureKey } from "@/lib/feature-flags";
 import { logoutAction } from "@/modules/auth/presentation/actions";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/inventario", label: "Inventario", icon: Package },
-  { href: "/bailarines", label: "Bailarines", icon: Users },
-  { href: "/movimientos", label: "Movimientos", icon: ArrowLeftRight },
-  { href: "/cuadros", label: "Cuadros", icon: Palette },
-  { href: "/alertas", label: "Alertas", icon: Bell },
-  { href: "/funciones", label: "Funciones", icon: Calendar },
-  { href: "/reportes", label: "Reportes", icon: FileText },
-] as const;
+const NAV_ITEMS: {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  feature: FeatureKey;
+}[] = [
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    feature: "dashboard",
+  },
+  {
+    href: "/inventario",
+    label: "Inventario",
+    icon: Package,
+    feature: "inventario",
+  },
+  {
+    href: "/bailarines",
+    label: "Bailarines",
+    icon: Users,
+    feature: "bailarines",
+  },
+  {
+    href: "/movimientos",
+    label: "Movimientos",
+    icon: ArrowLeftRight,
+    feature: "movimientos",
+  },
+  { href: "/cuadros", label: "Cuadros", icon: Palette, feature: "cuadros" },
+  { href: "/alertas", label: "Alertas", icon: Bell, feature: "alertas" },
+  {
+    href: "/funciones",
+    label: "Funciones",
+    icon: Calendar,
+    feature: "funciones",
+  },
+  { href: "/reportes", label: "Reportes", icon: FileText, feature: "reportes" },
+];
+
+const visibleNavItems = NAV_ITEMS.filter((item) => FEATURES[item.feature]);
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -79,7 +112,7 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 flex flex-col items-center gap-2">
-          {NAV_ITEMS.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             const Icon = item.icon;
             return (
