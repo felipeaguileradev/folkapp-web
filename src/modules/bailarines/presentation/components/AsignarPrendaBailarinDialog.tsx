@@ -221,8 +221,8 @@ export function AsignarPrendaBailarinDialog({
                         type="button"
                         onClick={() => handleToggle(prenda.id)}
                         className={cn(
-                          "w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-accent transition-colors",
-                          isSelected && "bg-accent/50",
+                          "w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-muted transition-colors",
+                          isSelected && "bg-muted",
                         )}
                       >
                         <div

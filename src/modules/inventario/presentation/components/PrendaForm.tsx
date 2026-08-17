@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Search, Check } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -12,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { cn } from "@/lib/utils";
 import type { Prenda } from "../../domain/entities";
 import type {
   Genero,
@@ -24,6 +26,10 @@ import {
   crearPrendaAction,
   actualizarPrendaAction,
 } from "../../infrastructure/actions";
+import {
+  obtenerBailarinesActivosAction,
+  type BailarinOption,
+} from "@/modules/bailarines/infrastructure/actions";
 import { ImageUploader } from "./ImageUploader";
 
 interface PrendaFormProps {
@@ -80,6 +86,9 @@ export function PrendaForm({
   const [propietario, setPropietario] = useState<Propietario>(
     source?.propietario ?? "Ballet",
   );
+  const [propietarioNombre, setPropietarioNombre] = useState(
+    source?.propietarioNombre ?? "",
+  );
   const [color, setColor] = useState(source?.color ?? "");
   const [tallaONumero, setTallaONumero] = useState(source?.tallaONumero ?? "");
   const [identificadorFisico, setIdentificadorFisico] = useState(
@@ -92,6 +101,24 @@ export function PrendaForm({
       ? source.fechaIngreso.toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0],
   );
+
+  // Bailarín (cuando estado es "En uso")
+  const [bailarinId, setBailarinId] = useState(source?.bailarinActualId ?? "");
+  const [bailarines, setBailarines] = useState<BailarinOption[]>([]);
+  const [bailarinSearch, setBailarinSearch] = useState("");
+  const [isLoadingBailarines, setIsLoadingBailarines] = useState(false);
+
+  useEffect(() => {
+    if (estado === "En uso" && bailarines.length === 0) {
+      setIsLoadingBailarines(true);
+      obtenerBailarinesActivosAction().then((result) => {
+        if (result.success) {
+          setBailarines(result.data);
+        }
+        setIsLoadingBailarines(false);
+      });
+    }
+  }, [estado, bailarines.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +140,10 @@ export function PrendaForm({
           categoria,
           estado,
           propietario,
+          propietarioNombre:
+            propietario === "Personal" ? propietarioNombre || null : null,
+          bailarinActualId:
+            estado === "En uso" && bailarinId ? bailarinId : null,
           color: color || null,
           tallaONumero: tallaONumero || null,
           identificadorFisico: identificadorFisico || null,
@@ -142,6 +173,10 @@ export function PrendaForm({
             categoria,
             estado,
             propietario,
+            propietarioNombre:
+              propietario === "Personal" ? propietarioNombre || null : null,
+            bailarinActualId:
+              estado === "En uso" && bailarinId ? bailarinId : null,
             color: color || null,
             tallaONumero: tallaONumero || null,
             identificadorFisico: identificadorFisico || null,
@@ -265,6 +300,81 @@ export function PrendaForm({
         </div>
       </div>
 
+      {/* Bailarín (solo si estado es "En uso") */}
+      {estado === "En uso" && (
+        <div className="space-y-2">
+          <Label>Bailarín asignado (opcional)</Label>
+          {bailarinId ? (
+            <div className="flex items-center justify-between rounded-md border border-input px-3 py-2">
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium">
+                  {bailarines.find((b) => b.id === bailarinId)
+                    ?.nombreCompleto ?? bailarinId}
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-auto px-2 py-1 text-xs"
+                onClick={() => {
+                  setBailarinId("");
+                  setBailarinSearch("");
+                }}
+              >
+                Quitar
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={bailarinSearch}
+                  onChange={(e) => setBailarinSearch(e.target.value)}
+                  placeholder="Buscar bailarín..."
+                  className="pl-9"
+                />
+              </div>
+              <div className="max-h-32 overflow-y-auto rounded-md border border-input">
+                {isLoadingBailarines ? (
+                  <p className="p-2 text-xs text-muted-foreground text-center">
+                    Cargando...
+                  </p>
+                ) : (
+                  <div className="py-1">
+                    {bailarines
+                      .filter((b) =>
+                        bailarinSearch.trim()
+                          ? b.nombreCompleto
+                              .toLowerCase()
+                              .includes(bailarinSearch.toLowerCase())
+                          : true,
+                      )
+                      .map((b) => (
+                        <button
+                          key={b.id}
+                          type="button"
+                          onClick={() => {
+                            setBailarinId(b.id);
+                            setBailarinSearch("");
+                          }}
+                          className={cn(
+                            "w-full px-3 py-1.5 text-left text-sm hover:bg-muted transition-colors",
+                          )}
+                        >
+                          {b.nombreCompleto}
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Propietario y Fecha */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -296,6 +406,20 @@ export function PrendaForm({
           />
         </div>
       </div>
+
+      {/* Nombre del dueño (solo si propietario es Personal) */}
+      {propietario === "Personal" && (
+        <div className="space-y-2">
+          <Label htmlFor="propietarioNombre">Nombre del dueño</Label>
+          <Input
+            id="propietarioNombre"
+            value={propietarioNombre}
+            onChange={(e) => setPropietarioNombre(e.target.value)}
+            placeholder="Ej: Felipe Araya"
+            maxLength={100}
+          />
+        </div>
+      )}
 
       {/* Color y Talla */}
       <div className="grid gap-4 sm:grid-cols-2">

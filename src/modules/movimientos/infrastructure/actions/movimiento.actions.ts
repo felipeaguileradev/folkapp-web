@@ -214,3 +214,76 @@ export async function traspasarPrendaAction(input: {
 
   return { success: false, error: result.error.message };
 }
+
+/**
+ * Server Action: Desasignar una prenda de un bailarín.
+ * Busca el movimiento activo (no devuelto) más reciente para esa prenda
+ * y lo marca como devuelto, dejando la prenda "Disponible".
+ */
+export async function desasignarPrendaAction(input: {
+  prendaId: string;
+  bailarinId: string;
+}): Promise<Result<void, string>> {
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Usuario no autenticado" };
+  }
+
+  // Buscar el movimiento activo más reciente de esta prenda para este bailarín
+  const { data: movimientos, error: fetchError } = await supabase
+    .from("movimientos")
+    .select("id")
+    .eq("prenda_id", input.prendaId)
+    .eq("bailarin_id", input.bailarinId)
+    .eq("devuelta", false)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (fetchError) {
+    return { success: false, error: "Error al buscar el movimiento activo" };
+  }
+
+  if (!movimientos || movimientos.length === 0) {
+    // No hay movimiento registrado, desasignar directamente la prenda
+    const { error: updateError } = await supabase
+      .from("prendas")
+      .update({
+        estado: "Disponible",
+        bailarin_actual: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", input.prendaId);
+
+    if (updateError) {
+      return { success: false, error: "Error al desasignar la prenda" };
+    }
+
+    revalidatePath("/movimientos");
+    revalidatePath("/inventario");
+    revalidatePath(`/bailarines/${input.bailarinId}`);
+    return { success: true, data: undefined };
+  }
+
+  // Usar la RPC de devolución con el movimiento encontrado
+  const movimientoId = movimientos[0].id;
+  const movimientoRepository = new SupabaseMovimientoRepository(supabase);
+
+  const result = await devolverPrenda(
+    { movimientoRepository },
+    { movimientoId },
+  );
+
+  if (result.success) {
+    revalidatePath("/movimientos");
+    revalidatePath("/inventario");
+    revalidatePath(`/bailarines/${input.bailarinId}`);
+    return { success: true, data: undefined };
+  }
+
+  return { success: false, error: result.error.message };
+}

@@ -16,6 +16,8 @@ export const createPrendaSchema = z.object({
   tallaONumero: z.string().max(20).nullable().optional(),
   identificadorFisico: z.string().max(50).nullable().optional(),
   propietario: z.enum(["Ballet", "Personal"]),
+  propietarioNombre: z.string().max(100).nullable().optional(),
+  bailarinActualId: z.string().uuid().nullable().optional(),
   ubicacion: z.string().max(100).nullable().optional(),
   estado: z.enum([
     "Disponible",

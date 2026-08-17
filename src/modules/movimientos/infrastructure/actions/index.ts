@@ -3,4 +3,5 @@ export {
   prestarPrendaAction,
   devolverPrendaAction,
   traspasarPrendaAction,
+  desasignarPrendaAction,
 } from "./movimiento.actions";

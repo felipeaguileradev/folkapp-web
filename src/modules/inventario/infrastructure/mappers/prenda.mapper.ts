@@ -23,6 +23,7 @@ export interface PrendaRow {
   identificador_fisico: string | null;
   bailarin_actual: string | null;
   propietario: string;
+  propietario_nombre: string | null;
   ubicacion: string | null;
   estado: string;
   foto_url: string | null;
@@ -42,7 +43,9 @@ export interface PrendaInsertRow {
   color: string | null;
   talla_o_numero: string | null;
   identificador_fisico: string | null;
+  bailarin_actual: string | null;
   propietario: string;
+  propietario_nombre: string | null;
   ubicacion: string | null;
   estado: string;
   comentarios: string | null;
@@ -60,6 +63,7 @@ export interface PrendaUpdateRow {
   identificador_fisico?: string | null;
   bailarin_actual?: string | null;
   propietario?: string;
+  propietario_nombre?: string | null;
   ubicacion?: string | null;
   estado?: string;
   foto_url?: string | null;
@@ -86,6 +90,7 @@ export class PrendaMapper {
       identificadorFisico: row.identificador_fisico,
       bailarinActualId: row.bailarin_actual,
       propietario: row.propietario as Propietario,
+      propietarioNombre: row.propietario_nombre ?? null,
       ubicacion: row.ubicacion,
       estado: row.estado as EstadoPrenda,
       fotoUrl: row.foto_url,
@@ -107,7 +112,9 @@ export class PrendaMapper {
       color: dto.color ?? null,
       talla_o_numero: dto.tallaONumero ?? null,
       identificador_fisico: dto.identificadorFisico ?? null,
+      bailarin_actual: dto.bailarinActualId ?? null,
       propietario: dto.propietario,
+      propietario_nombre: dto.propietarioNombre ?? null,
       ubicacion: dto.ubicacion ?? null,
       estado: dto.estado,
       comentarios: dto.comentarios ?? null,
@@ -130,6 +137,8 @@ export class PrendaMapper {
     if (dto.bailarinActualId !== undefined)
       row.bailarin_actual = dto.bailarinActualId;
     if (dto.propietario !== undefined) row.propietario = dto.propietario;
+    if (dto.propietarioNombre !== undefined)
+      row.propietario_nombre = dto.propietarioNombre;
     if (dto.ubicacion !== undefined) row.ubicacion = dto.ubicacion;
     if (dto.estado !== undefined) row.estado = dto.estado;
     if (dto.fotoUrl !== undefined) row.foto_url = dto.fotoUrl;

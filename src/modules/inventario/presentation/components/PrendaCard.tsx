@@ -192,7 +192,11 @@ export function PrendaCard({
               <DetailItem
                 icon={<Tag className="h-4 w-4" />}
                 label="Propietario"
-                value={prenda.propietario}
+                value={
+                  prenda.propietario === "Personal" && prenda.propietarioNombre
+                    ? `Personal — ${prenda.propietarioNombre}`
+                    : prenda.propietario
+                }
               />
               <DetailItem
                 icon={<MapPin className="h-4 w-4" />}

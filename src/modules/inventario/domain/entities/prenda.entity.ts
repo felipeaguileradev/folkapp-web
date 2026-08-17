@@ -18,6 +18,7 @@ export interface Prenda {
   identificadorFisico: string | null; // max 50
   bailarinActualId: string | null;
   propietario: Propietario;
+  propietarioNombre: string | null; // nombre del dueño si propietario es "Personal"
   ubicacion: string | null; // max 100
   estado: EstadoPrenda;
   fotoUrl: string | null;
@@ -37,7 +38,9 @@ export interface CreatePrendaDTO {
   color?: string | null;
   tallaONumero?: string | null;
   identificadorFisico?: string | null;
+  bailarinActualId?: string | null;
   propietario: Propietario;
+  propietarioNombre?: string | null;
   ubicacion?: string | null;
   estado: EstadoPrenda;
   comentarios?: string | null;
@@ -55,6 +58,7 @@ export interface UpdatePrendaDTO {
   identificadorFisico?: string | null;
   bailarinActualId?: string | null;
   propietario?: Propietario;
+  propietarioNombre?: string | null;
   ubicacion?: string | null;
   estado?: EstadoPrenda;
   fotoUrl?: string | null;
