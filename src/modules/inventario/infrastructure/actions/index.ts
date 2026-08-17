@@ -6,5 +6,9 @@ export {
   eliminarPrendasMasivoAction,
   buscarPrendasAction,
   uploadPrendaImage,
+  obtenerPrendasDisponiblesAction,
 } from "./prenda.actions";
-export type { BulkItemOverride } from "./prenda.actions";
+export type {
+  BulkItemOverride,
+  PrendaDisponibleOption,
+} from "./prenda.actions";

@@ -14,7 +14,6 @@ export interface BailarinRow {
   nombre_completo: string;
   genero: GeneroBailarin;
   cuadros_activos: string[];
-  color_norte: string | null;
   tallas: Tallas | null;
   activo: boolean;
   fecha_ingreso: string;
@@ -28,7 +27,6 @@ export interface BailarinInsertRow {
   nombre_completo: string;
   genero: GeneroBailarin;
   cuadros_activos: string[];
-  color_norte: string | null;
   tallas: Tallas;
   activo: boolean;
   fecha_ingreso: string;
@@ -54,7 +52,6 @@ export class BailarinMapper {
       nombreCompleto: row.nombre_completo,
       genero: row.genero,
       cuadrosActivos: row.cuadros_activos ?? [],
-      colorNorte: row.color_norte,
       tallas: row.tallas ?? DEFAULT_TALLAS,
       activo: row.activo,
       fechaIngreso: new Date(row.fecha_ingreso),
@@ -70,7 +67,6 @@ export class BailarinMapper {
       nombre_completo: dto.nombreCompleto,
       genero: dto.genero,
       cuadros_activos: dto.cuadrosActivos,
-      color_norte: dto.colorNorte,
       tallas: dto.tallas,
       activo: dto.activo,
       fecha_ingreso: dto.fechaIngreso.toISOString().split("T")[0],
@@ -90,9 +86,6 @@ export class BailarinMapper {
     }
     if (dto.cuadrosActivos !== undefined) {
       row.cuadros_activos = dto.cuadrosActivos;
-    }
-    if (dto.colorNorte !== undefined) {
-      row.color_norte = dto.colorNorte;
     }
     if (dto.tallas !== undefined) {
       row.tallas = dto.tallas;

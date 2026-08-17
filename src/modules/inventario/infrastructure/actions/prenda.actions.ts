@@ -296,3 +296,54 @@ export async function eliminarPrendasMasivoAction(
 
   return { success: true, data: { deleted, errors } };
 }
+
+/** Prenda simplificada para selectores de asignación rápida */
+export interface PrendaDisponibleOption {
+  id: string;
+  nombre: string;
+  codigoIdentificador: string;
+  categoria: string;
+  cuadroId: string;
+  color: string | null;
+  tallaONumero: string | null;
+  identificadorFisico: string | null;
+  propietario: string;
+}
+
+/**
+ * Server Action: Obtener prendas disponibles filtradas por género.
+ * Incluye prendas con género "Unisex" además del género indicado.
+ * Solo retorna prendas con estado "Disponible".
+ */
+export async function obtenerPrendasDisponiblesAction(
+  genero: "Masculino" | "Femenino",
+): Promise<Result<PrendaDisponibleOption[], string>> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("prendas")
+    .select(
+      "id, nombre, codigo_identificador, categoria, cuadro_id, color, talla_o_numero, identificador_fisico, propietario",
+    )
+    .eq("estado", "Disponible")
+    .in("genero", [genero, "Unisex"])
+    .order("nombre");
+
+  if (error) {
+    return { success: false, error: "Error al cargar prendas disponibles" };
+  }
+
+  const prendas: PrendaDisponibleOption[] = (data ?? []).map((row) => ({
+    id: row.id,
+    nombre: row.nombre,
+    codigoIdentificador: row.codigo_identificador,
+    categoria: row.categoria,
+    cuadroId: row.cuadro_id,
+    color: row.color,
+    tallaONumero: row.talla_o_numero,
+    identificadorFisico: row.identificador_fisico,
+    propietario: row.propietario,
+  }));
+
+  return { success: true, data: prendas };
+}

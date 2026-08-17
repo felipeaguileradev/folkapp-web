@@ -16,34 +16,34 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- 2. BAILARINES (Masculinos)
 -- ============================================================
-INSERT INTO bailarines (id, nombre_completo, genero, cuadros_activos, color_norte, tallas, activo, fecha_ingreso)
+INSERT INTO bailarines (id, nombre_completo, genero, cuadros_activos, tallas, activo, fecha_ingreso)
 VALUES
   ('b1000000-0000-0000-0000-000000000001', 'David Valenzuela', 'Masculino',
-   ARRAY['c1000000-0000-0000-0000-000000000001'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001'],
    '{"camisa": "M", "pantalon": "40", "sombrero": "57", "calzado": "42", "personalizados": []}'::jsonb,
    true, '2020-03-15'),
   ('b1000000-0000-0000-0000-000000000002', 'Felipe Araya', 'Masculino',
-   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'], 'Rojo',
+   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'],
    '{"camisa": "L", "pantalon": "42", "sombrero": "58", "calzado": "43", "personalizados": []}'::jsonb,
    true, '2019-08-01'),
   ('b1000000-0000-0000-0000-000000000003', 'Oscar Contreras', 'Masculino',
-   ARRAY['c1000000-0000-0000-0000-000000000001'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001'],
    '{"camisa": "M", "pantalon": "38", "sombrero": "56", "calzado": "41", "personalizados": []}'::jsonb,
    true, '2021-03-10'),
   ('b1000000-0000-0000-0000-000000000004', 'Daniel Muñoz', 'Masculino',
-   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000003'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000003'],
    '{"camisa": "L", "pantalon": "42", "sombrero": "58", "calzado": "44", "personalizados": []}'::jsonb,
    true, '2020-07-20'),
   ('b1000000-0000-0000-0000-000000000005', 'L. Felipe Aravena', 'Masculino',
-   ARRAY['c1000000-0000-0000-0000-000000000001'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001'],
    '{"camisa": "S", "pantalon": "36", "sombrero": "55", "calzado": "40", "personalizados": []}'::jsonb,
    true, '2022-01-15'),
   ('b1000000-0000-0000-0000-000000000006', 'Matias Diaz', 'Masculino',
-   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'], 'Azul',
+   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'],
    '{"camisa": "M", "pantalon": "40", "sombrero": "57", "calzado": "42", "personalizados": []}'::jsonb,
    true, '2021-06-01'),
   ('b1000000-0000-0000-0000-000000000007', 'Ignacio Parra', 'Masculino',
-   ARRAY['c1000000-0000-0000-0000-000000000001'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001'],
    '{"camisa": "L", "pantalon": "44", "sombrero": "59", "calzado": "44", "personalizados": []}'::jsonb,
    true, '2023-03-01')
 ON CONFLICT (id) DO NOTHING;
@@ -51,34 +51,34 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- 3. BAILARINES (Femeninas)
 -- ============================================================
-INSERT INTO bailarines (id, nombre_completo, genero, cuadros_activos, color_norte, tallas, activo, fecha_ingreso)
+INSERT INTO bailarines (id, nombre_completo, genero, cuadros_activos, tallas, activo, fecha_ingreso)
 VALUES
   ('b2000000-0000-0000-0000-000000000001', 'Cristina Morales', 'Femenino',
-   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'], 'Rojo',
+   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'],
    '{"camisa": "S", "pantalon": "36", "sombrero": "55", "calzado": "37", "personalizados": []}'::jsonb,
    true, '2019-03-15'),
   ('b2000000-0000-0000-0000-000000000002', 'Fernanda Muñoz', 'Femenino',
-   ARRAY['c1000000-0000-0000-0000-000000000001'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001'],
    '{"camisa": "M", "pantalon": "38", "sombrero": "56", "calzado": "38", "personalizados": []}'::jsonb,
    true, '2020-08-01'),
   ('b2000000-0000-0000-0000-000000000003', 'Josefa Martínez', 'Femenino',
-   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000003'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000003'],
    '{"camisa": "S", "pantalon": "36", "sombrero": "55", "calzado": "36", "personalizados": []}'::jsonb,
    true, '2021-03-10'),
   ('b2000000-0000-0000-0000-000000000004', 'Javiera Vidal', 'Femenino',
-   ARRAY['c1000000-0000-0000-0000-000000000001'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001'],
    '{"camisa": "M", "pantalon": "38", "sombrero": "56", "calzado": "38", "personalizados": []}'::jsonb,
    true, '2020-07-20'),
   ('b2000000-0000-0000-0000-000000000005', 'Beatriz Araya', 'Femenino',
-   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'], 'Verde',
+   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000002'],
    '{"camisa": "S", "pantalon": "34", "sombrero": "54", "calzado": "36", "personalizados": []}'::jsonb,
    true, '2022-01-15'),
   ('b2000000-0000-0000-0000-000000000006', 'Camila Moreno', 'Femenino',
-   ARRAY['c1000000-0000-0000-0000-000000000001'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001'],
    '{"camisa": "M", "pantalon": "38", "sombrero": "56", "calzado": "37", "personalizados": []}'::jsonb,
    true, '2021-06-01'),
   ('b2000000-0000-0000-0000-000000000007', 'Josefa Torres', 'Femenino',
-   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000003'], NULL,
+   ARRAY['c1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000003'],
    '{"camisa": "S", "pantalon": "36", "sombrero": "55", "calzado": "37", "personalizados": []}'::jsonb,
    true, '2023-03-01')
 ON CONFLICT (id) DO NOTHING;

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowLeftRight,
   Edit,
   Trash2,
   Copy,
@@ -40,11 +41,13 @@ import type { EstadoPrenda } from "@/shared/types";
 import { toast } from "@/shared/hooks/useToast";
 import { eliminarPrendaAction } from "../../infrastructure/actions";
 import { PrendaFormDialog } from "./PrendaFormDialog";
+import { TraspasoDialog } from "@/modules/movimientos/presentation/components";
 import type { Cuadro } from "@/modules/cuadros/domain/entities";
 
 interface PrendaCardProps {
   prenda: Prenda;
   cuadros: Cuadro[];
+  bailarinNombre: string | null;
 }
 
 const ESTADO_STYLES: Record<EstadoPrenda, string> = {
@@ -56,10 +59,15 @@ const ESTADO_STYLES: Record<EstadoPrenda, string> = {
   "Dada de baja": "bg-gray-100 text-gray-800 border-gray-200",
 };
 
-export function PrendaCard({ prenda, cuadros }: PrendaCardProps) {
+export function PrendaCard({
+  prenda,
+  cuadros,
+  bailarinNombre,
+}: PrendaCardProps) {
   const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
+  const [isTraspasoOpen, setIsTraspasoOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -110,6 +118,16 @@ export function PrendaCard({ prenda, cuadros }: PrendaCardProps) {
               </p>
             </div>
             <div className="flex gap-2">
+              {prenda.bailarinActualId && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsTraspasoOpen(true)}
+                >
+                  <ArrowLeftRight className="mr-2 h-4 w-4" />
+                  Traspasar
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -189,7 +207,7 @@ export function PrendaCard({ prenda, cuadros }: PrendaCardProps) {
               <DetailItem
                 icon={<User className="h-4 w-4" />}
                 label="Bailarín actual"
-                value={prenda.bailarinActualId ?? "Sin asignar"}
+                value={bailarinNombre ?? "Sin asignar"}
               />
             </div>
 
@@ -272,6 +290,16 @@ export function PrendaCard({ prenda, cuadros }: PrendaCardProps) {
         cuadros={cuadros}
         initialData={prenda}
       />
+
+      {/* Traspaso Dialog */}
+      {prenda.bailarinActualId && (
+        <TraspasoDialog
+          open={isTraspasoOpen}
+          onOpenChange={setIsTraspasoOpen}
+          prendaId={prenda.id}
+          bailarinOrigenId={prenda.bailarinActualId}
+        />
+      )}
     </>
   );
 }

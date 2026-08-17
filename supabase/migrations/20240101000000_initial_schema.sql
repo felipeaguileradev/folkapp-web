@@ -41,7 +41,6 @@ CREATE TABLE IF NOT EXISTS public.bailarines (
   nombre_completo text NOT NULL,
   genero text NOT NULL CHECK (genero IN ('Masculino', 'Femenino')),
   cuadros_activos uuid[] NOT NULL DEFAULT '{}',
-  color_norte text,
   tallas jsonb NOT NULL DEFAULT '{}',
   activo boolean NOT NULL DEFAULT true,
   fecha_ingreso date NOT NULL,

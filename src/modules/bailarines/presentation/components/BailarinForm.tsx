@@ -57,7 +57,6 @@ export function BailarinForm({
     const validIds = cuadrosDisponibles.map((c) => c.id);
     return ids.filter((id) => validIds.includes(id));
   });
-  const [colorNorte, setColorNorte] = useState(bailarin?.colorNorte ?? "");
   const [fechaIngreso, setFechaIngreso] = useState(
     bailarin?.fechaIngreso
       ? bailarin.fechaIngreso.toISOString().split("T")[0]
@@ -79,7 +78,6 @@ export function BailarinForm({
       if (prev.includes(cuadroId)) {
         return prev.filter((id) => id !== cuadroId);
       }
-      if (prev.length >= 3) return prev;
       return [...prev, cuadroId];
     });
   };
@@ -119,7 +117,6 @@ export function BailarinForm({
         nombreCompleto,
         genero,
         cuadrosActivos,
-        colorNorte: colorNorte || null,
         tallas: {
           camisa: camisa || null,
           pantalon: pantalon || null,
@@ -209,7 +206,7 @@ export function BailarinForm({
 
       {/* Cuadros */}
       <div className="space-y-2">
-        <Label>Cuadros activos (máx. 3)</Label>
+        <Label>Cuadros activos</Label>
         <div className="flex flex-wrap gap-2">
           {cuadrosDisponibles.map((cuadro) => {
             const isSelected = cuadrosActivos.includes(cuadro.id);
@@ -228,25 +225,9 @@ export function BailarinForm({
           })}
         </div>
         <p className="text-xs text-muted-foreground">
-          {cuadrosActivos.length} de 3 seleccionados
+          {cuadrosActivos.length} seleccionados
         </p>
       </div>
-
-      {/* Color Norte (solo si Norte está seleccionado) */}
-      {cuadrosActivos.some((id) => {
-        const cuadro = cuadrosDisponibles.find((c) => c.id === id);
-        return cuadro?.name.toLowerCase() === "norte";
-      }) && (
-        <div className="space-y-2">
-          <Label htmlFor="colorNorte">Color Norte</Label>
-          <Input
-            id="colorNorte"
-            value={colorNorte}
-            onChange={(e) => setColorNorte(e.target.value)}
-            placeholder="Ej: Rojo, Azul"
-          />
-        </div>
-      )}
 
       {/* Tallas predefinidas */}
       <div className="space-y-2">

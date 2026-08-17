@@ -6,4 +6,4 @@ export { BailarinProfile } from "./BailarinProfile";
 export { BailarinForm } from "./BailarinForm";
 export { BailarinFormDialog } from "./BailarinFormDialog";
 export { TallasSection } from "./TallasSection";
-export { ColorNorteBadge } from "./ColorNorteBadge";
+export { AsignarPrendaBailarinDialog } from "./AsignarPrendaBailarinDialog";

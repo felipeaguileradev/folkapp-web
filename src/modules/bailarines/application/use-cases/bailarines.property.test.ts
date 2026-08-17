@@ -38,7 +38,6 @@ function createMockBailarin(overrides: Partial<Bailarin> = {}): Bailarin {
     nombreCompleto: "Test Bailarin",
     genero: "Masculino",
     cuadrosActivos: ["cuadro-1"],
-    colorNorte: null,
     tallas: {
       camisa: null,
       pantalon: null,

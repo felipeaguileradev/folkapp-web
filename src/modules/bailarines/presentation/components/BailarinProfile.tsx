@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
+  ArrowLeftRight,
   Edit,
   UserCheck,
   UserX,
   Calendar,
+  Plus,
   Ruler,
+  Shirt,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -22,23 +25,29 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { toast } from "@/shared/hooks/useToast";
 import type { Bailarin } from "../../domain";
+import type { Prenda } from "@/modules/inventario/domain/entities";
 import { toggleActivoAction } from "../../infrastructure/actions";
 import { BailarinFormDialog } from "./BailarinFormDialog";
-import { ColorNorteBadge } from "./ColorNorteBadge";
 import { TallasSection } from "./TallasSection";
+import { AsignarPrendaBailarinDialog } from "./AsignarPrendaBailarinDialog";
+import { TraspasoDialog } from "@/modules/movimientos/presentation/components";
 
 interface BailarinProfileProps {
   bailarin: Bailarin;
   cuadrosMap: Record<string, string>;
+  prendasAsignadas?: Prenda[];
 }
 
 export function BailarinProfile({
   bailarin,
   cuadrosMap,
+  prendasAsignadas,
 }: BailarinProfileProps) {
   const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+  const [traspasoPrendaId, setTraspasoPrendaId] = useState<string | null>(null);
+  const [isAsignarOpen, setIsAsignarOpen] = useState(false);
 
   const handleToggleActivo = async () => {
     setIsToggling(true);
@@ -123,9 +132,6 @@ export function BailarinProfile({
                   {(cuadrosMap ?? {})[cuadroId] ?? cuadroId}
                 </Badge>
               ))}
-              {bailarin.colorNorte && (
-                <ColorNorteBadge color={bailarin.colorNorte} />
-              )}
             </div>
 
             <Separator />
@@ -183,6 +189,85 @@ export function BailarinProfile({
         </Card>
       </div>
 
+      {/* Prendas asignadas */}
+      {(() => {
+        // Agrupar prendas por cuadro
+        const prendasPorCuadro: Record<string, Prenda[]> = {};
+        for (const prenda of prendasAsignadas ?? []) {
+          const cuadroNombre = cuadrosMap[prenda.cuadroId] ?? "Sin cuadro";
+          if (!prendasPorCuadro[cuadroNombre]) {
+            prendasPorCuadro[cuadroNombre] = [];
+          }
+          prendasPorCuadro[cuadroNombre].push(prenda);
+        }
+
+        return (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Shirt className="h-4 w-4" />
+                Prendas asignadas ({(prendasAsignadas ?? []).length})
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAsignarOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Asignar prenda
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {(prendasAsignadas ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No tiene prendas asignadas
+                </p>
+              ) : (
+                Object.entries(prendasPorCuadro).map(
+                  ([cuadroNombre, prendas]) => (
+                    <div key={cuadroNombre} className="space-y-2">
+                      <h4 className="text-sm font-semibold text-muted-foreground">
+                        {cuadroNombre}
+                      </h4>
+                      <div className="space-y-1.5">
+                        {prendas.map((prenda) => (
+                          <div
+                            key={prenda.id}
+                            className="flex items-center justify-between rounded-lg border px-3 py-2"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">
+                                {prenda.nombre}
+                              </p>
+                              <p className="text-xs text-muted-foreground font-mono">
+                                {prenda.codigoIdentificador}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Badge variant="secondary" className="text-xs">
+                                {prenda.categoria}
+                              </Badge>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setTraspasoPrendaId(prenda.id)}
+                              >
+                                <ArrowLeftRight className="h-4 w-4 mr-1" />
+                                Traspasar
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ),
+                )
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* Edit Dialog */}
       <BailarinFormDialog
         open={isEditOpen}
@@ -195,6 +280,27 @@ export function BailarinProfile({
             name,
           }),
         )}
+      />
+
+      {/* Traspaso Dialog */}
+      {traspasoPrendaId && (
+        <TraspasoDialog
+          open={!!traspasoPrendaId}
+          onOpenChange={(open) => {
+            if (!open) setTraspasoPrendaId(null);
+          }}
+          prendaId={traspasoPrendaId}
+          bailarinOrigenId={bailarin.id}
+        />
+      )}
+
+      {/* Asignar Prenda Dialog */}
+      <AsignarPrendaBailarinDialog
+        open={isAsignarOpen}
+        onOpenChange={setIsAsignarOpen}
+        bailarinId={bailarin.id}
+        genero={bailarin.genero}
+        cuadrosMap={cuadrosMap}
       />
     </>
   );

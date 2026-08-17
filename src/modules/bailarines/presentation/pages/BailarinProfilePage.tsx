@@ -3,6 +3,7 @@ import { SupabaseBailarinRepository } from "../../infrastructure/repositories/su
 import { SupabaseCuadroRepository } from "@/modules/cuadros/infrastructure/repositories/supabase-cuadro.repository";
 import { BailarinProfile } from "../components/BailarinProfile";
 import { notFound } from "next/navigation";
+import type { Prenda } from "@/modules/inventario/domain/entities";
 
 interface BailarinProfilePageProps {
   bailarinId: string;
@@ -32,9 +33,31 @@ export async function BailarinProfilePage({
     // Si falla la carga de cuadros, continuar con mapa vacío
   }
 
+  // Cargar prendas asignadas al bailarín
+  let prendasAsignadas: Prenda[] = [];
+  try {
+    const { PrendaMapper } =
+      await import("@/modules/inventario/infrastructure/mappers");
+    const { data } = await supabase
+      .from("prendas")
+      .select("*")
+      .eq("bailarin_actual", bailarinId)
+      .order("nombre");
+
+    if (data) {
+      prendasAsignadas = data.map(PrendaMapper.toDomain);
+    }
+  } catch {
+    // Si falla la carga de prendas, continuar con array vacío
+  }
+
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <BailarinProfile bailarin={bailarin} cuadrosMap={cuadrosMap} />
+      <BailarinProfile
+        bailarin={bailarin}
+        cuadrosMap={cuadrosMap}
+        prendasAsignadas={prendasAsignadas}
+      />
     </div>
   );
 }

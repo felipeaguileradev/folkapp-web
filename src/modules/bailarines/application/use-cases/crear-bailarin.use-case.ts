@@ -30,7 +30,6 @@ export async function crearBailarin(
       nombreCompleto: data.nombreCompleto,
       genero: data.genero,
       cuadrosActivos: data.cuadrosActivos,
-      colorNorte: data.colorNorte ?? null,
       tallas: {
         camisa: data.tallas.camisa ?? null,
         pantalon: data.tallas.pantalon ?? null,
