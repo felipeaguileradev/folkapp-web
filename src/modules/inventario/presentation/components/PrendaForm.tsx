@@ -19,6 +19,7 @@ import type {
   EstadoPrenda,
   Propietario,
 } from "@/shared/types";
+import type { Cuadro } from "@/modules/cuadros/domain/entities";
 import {
   crearPrendaAction,
   actualizarPrendaAction,
@@ -28,15 +29,10 @@ import { ImageUploader } from "./ImageUploader";
 interface PrendaFormProps {
   prenda?: Prenda;
   onSuccess: () => void;
+  cuadros: Cuadro[];
+  /** Datos iniciales para pre-llenar (usado al duplicar) */
+  initialData?: Prenda;
 }
-
-// Mapeo de cuadroId a nombre (se usará para generar código)
-// En producción esto vendría de la DB, pero por ahora usamos los 3 cuadros conocidos
-const CUADROS = [
-  { id: "huaso", name: "Huaso" as const },
-  { id: "norte", name: "Norte" as const },
-  { id: "rapa-nui", name: "Rapa Nui" as const },
-] as const;
 
 const GENERO_OPTIONS: Genero[] = ["Masculino", "Femenino", "Unisex"];
 const CATEGORIA_OPTIONS: Categoria[] = [
@@ -57,35 +53,43 @@ const ESTADO_OPTIONS: EstadoPrenda[] = [
 ];
 const PROPIETARIO_OPTIONS: Propietario[] = ["Ballet", "Personal"];
 
-export function PrendaForm({ prenda, onSuccess }: PrendaFormProps) {
+export function PrendaForm({
+  prenda,
+  onSuccess,
+  cuadros,
+  initialData,
+}: PrendaFormProps) {
   const isEditing = !!prenda;
+
+  // Usar initialData (duplicar) o prenda (editar) como fuente de datos iniciales
+  const source = prenda ?? initialData;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Form state
-  const [nombre, setNombre] = useState(prenda?.nombre ?? "");
-  const [cuadroId, setCuadroId] = useState(prenda?.cuadroId ?? "");
-  const [genero, setGenero] = useState<Genero | "">(prenda?.genero ?? "");
+  const [nombre, setNombre] = useState(source?.nombre ?? "");
+  const [cuadroId, setCuadroId] = useState(source?.cuadroId ?? "");
+  const [genero, setGenero] = useState<Genero | "">(source?.genero ?? "");
   const [categoria, setCategoria] = useState<Categoria | "">(
-    prenda?.categoria ?? "",
+    source?.categoria ?? "",
   );
   const [estado, setEstado] = useState<EstadoPrenda>(
-    prenda?.estado ?? "Disponible",
+    source?.estado ?? "Disponible",
   );
   const [propietario, setPropietario] = useState<Propietario>(
-    prenda?.propietario ?? "Ballet",
+    source?.propietario ?? "Ballet",
   );
-  const [color, setColor] = useState(prenda?.color ?? "");
-  const [tallaONumero, setTallaONumero] = useState(prenda?.tallaONumero ?? "");
+  const [color, setColor] = useState(source?.color ?? "");
+  const [tallaONumero, setTallaONumero] = useState(source?.tallaONumero ?? "");
   const [identificadorFisico, setIdentificadorFisico] = useState(
-    prenda?.identificadorFisico ?? "",
+    source?.identificadorFisico ?? "",
   );
-  const [ubicacion, setUbicacion] = useState(prenda?.ubicacion ?? "");
-  const [comentarios, setComentarios] = useState(prenda?.comentarios ?? "");
+  const [ubicacion, setUbicacion] = useState(source?.ubicacion ?? "");
+  const [comentarios, setComentarios] = useState(source?.comentarios ?? "");
   const [fechaIngreso, setFechaIngreso] = useState(
-    prenda?.fechaIngreso
-      ? prenda.fechaIngreso.toISOString().split("T")[0]
+    source?.fechaIngreso
+      ? source.fechaIngreso.toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0],
   );
 
@@ -123,7 +127,7 @@ export function PrendaForm({ prenda, onSuccess }: PrendaFormProps) {
           setError(result.error);
         }
       } else {
-        const cuadro = CUADROS.find((c) => c.id === cuadroId);
+        const cuadro = cuadros.find((c) => c.id === cuadroId);
         if (!cuadro) {
           setError("Selecciona un cuadro válido");
           setIsSubmitting(false);
@@ -145,7 +149,7 @@ export function PrendaForm({ prenda, onSuccess }: PrendaFormProps) {
             comentarios: comentarios || null,
             fechaIngreso: new Date(fechaIngreso),
           },
-          cuadro.name,
+          cuadro.nombre as "Huaso" | "Norte" | "Rapa Nui",
         );
 
         if (result.success) {
@@ -191,9 +195,9 @@ export function PrendaForm({ prenda, onSuccess }: PrendaFormProps) {
               <SelectValue placeholder="Seleccionar cuadro" />
             </SelectTrigger>
             <SelectContent>
-              {CUADROS.map((cuadro) => (
+              {cuadros.map((cuadro) => (
                 <SelectItem key={cuadro.id} value={cuadro.id}>
-                  {cuadro.name}
+                  {cuadro.nombre}
                 </SelectItem>
               ))}
             </SelectContent>

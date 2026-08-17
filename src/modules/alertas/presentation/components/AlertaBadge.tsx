@@ -2,18 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import {
-  AlertTriangle,
-  AlertCircle,
-  Info,
-  CheckCircle,
-  ExternalLink,
-} from "lucide-react";
+import { Clock, AlertTriangle, Wrench, CheckCircle } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { toast } from "@/shared/hooks/useToast";
 import type { Alerta } from "../../domain/entities";
 import type { Prioridad } from "@/shared/types";
 import { resolverAlertaAction } from "../../infrastructure/actions";
@@ -23,37 +15,32 @@ interface AlertaBadgeProps {
   showResolverButton?: boolean;
 }
 
-const PRIORIDAD_CONFIG: Record<
-  Prioridad,
-  { icon: React.ReactNode; color: string; badgeClass: string }
-> = {
-  Alta: {
-    icon: <AlertTriangle className="h-4 w-4" />,
-    color: "border-l-red-500",
-    badgeClass: "bg-red-100 text-red-800 border-red-200",
+const PRIORIDAD_BADGE: Record<Prioridad, { bg: string; color: string }> = {
+  Alta: { bg: "bg-red-100", color: "text-red-700" },
+  Media: { bg: "bg-amber-100", color: "text-amber-700" },
+  Baja: { bg: "bg-secondary", color: "text-muted-foreground" },
+};
+
+const ICON_CONFIG: Record<string, { icon: typeof Clock; bg: string }> = {
+  prestamo_vencido: { icon: Clock, bg: "bg-red-100 text-red-600" },
+  faltante_sin_movimiento: {
+    icon: AlertTriangle,
+    bg: "bg-amber-100 text-amber-600",
   },
-  Media: {
-    icon: <AlertCircle className="h-4 w-4" />,
-    color: "border-l-yellow-500",
-    badgeClass: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  reparacion_prolongada: {
+    icon: Wrench,
+    bg: "bg-amber-100 text-amber-600",
   },
-  Baja: {
-    icon: <Info className="h-4 w-4" />,
-    color: "border-l-blue-500",
-    badgeClass: "bg-blue-100 text-blue-800 border-blue-200",
-  },
+  default: { icon: CheckCircle, bg: "bg-emerald-100 text-emerald-600" },
 };
 
 export function AlertaBadge({ alerta, showResolverButton }: AlertaBadgeProps) {
   const router = useRouter();
   const [isResolving, setIsResolving] = useState(false);
 
-  const config = PRIORIDAD_CONFIG[alerta.prioridad];
-
-  const entityLink =
-    alerta.entidadTipo === "prenda"
-      ? `/inventario/${alerta.entidadId}`
-      : `/bailarines/${alerta.entidadId}`;
+  const prioridadStyle = PRIORIDAD_BADGE[alerta.prioridad];
+  const iconCfg = ICON_CONFIG[alerta.tipoCondicion] ?? ICON_CONFIG.default;
+  const Icon = iconCfg.icon;
 
   const handleResolver = async () => {
     setIsResolving(true);
@@ -62,61 +49,72 @@ export function AlertaBadge({ alerta, showResolverButton }: AlertaBadgeProps) {
     if (result.success) {
       router.refresh();
     } else {
-      alert(result.error);
+      toast({
+        variant: "destructive",
+        title: "Error al resolver",
+        description: result.error,
+      });
     }
     setIsResolving(false);
   };
 
   return (
-    <Card className={cn("border-l-4", config.color)}>
-      <CardContent className="flex items-start gap-3 py-3 px-4">
-        <span className="mt-0.5 text-muted-foreground">{config.icon}</span>
+    <div
+      className={cn(
+        "border border-border rounded-2xl px-[18px] py-4 flex items-center gap-4",
+        alerta.resuelta && "opacity-60",
+      )}
+    >
+      {/* Icon */}
+      <div
+        className={`w-11 h-11 rounded-[13px] flex items-center justify-center shrink-0 ${iconCfg.bg}`}
+      >
+        <Icon className="h-[22px] w-[22px]" />
+      </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <Badge
-              variant="outline"
-              className={cn("text-xs", config.badgeClass)}
-            >
-              {alerta.prioridad}
-            </Badge>
-            <Badge variant="secondary" className="text-xs">
-              {alerta.tipoCondicion.replace(/_/g, " ")}
-            </Badge>
-            <span className="text-xs text-muted-foreground">
-              {alerta.fechaGeneracion.toLocaleDateString("es-CL")}
-            </span>
-          </div>
-          <p className="text-sm">{alerta.descripcion}</p>
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-[14.5px] font-bold truncate">
+          {alerta.tipoCondicion === "prestamo_vencido"
+            ? "Devolución vencida"
+            : alerta.tipoCondicion === "faltante_sin_movimiento"
+              ? "Prenda faltante"
+              : alerta.tipoCondicion.replace(/_/g, " ")}
+        </p>
+        <p className="text-[12.5px] text-muted-foreground mt-0.5 truncate">
+          {alerta.descripcion}
+        </p>
+        {alerta.resuelta && alerta.fechaResolucion && (
+          <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
+            <CheckCircle className="h-3 w-3 text-emerald-600" />
+            Resuelta el {alerta.fechaResolucion.toLocaleDateString("es-CL")}
+          </p>
+        )}
+      </div>
 
-          {alerta.resuelta && alerta.fechaResolucion && (
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-              <CheckCircle className="h-3 w-3 text-green-500" />
-              Resuelta el {alerta.fechaResolucion.toLocaleDateString("es-CL")}
-              {alerta.resueltaPor === "sistema" ? " (automática)" : ""}
-            </p>
-          )}
-        </div>
+      {/* Severity badge */}
+      <span
+        className={cn(
+          "text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0",
+          prioridadStyle.bg,
+          prioridadStyle.color,
+        )}
+      >
+        {alerta.prioridad}
+      </span>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={entityLink}>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          </Button>
-
-          {showResolverButton && !alerta.resuelta && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleResolver}
-              disabled={isResolving}
-            >
-              {isResolving ? "..." : "Resolver"}
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      {/* Resolver button */}
+      {showResolverButton && !alerta.resuelta && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleResolver}
+          disabled={isResolving}
+          className="shrink-0 text-[12.5px] font-bold rounded-[11px] h-auto py-2.5 px-3.5"
+        >
+          {isResolving ? "..." : "Resolver"}
+        </Button>
+      )}
+    </div>
   );
 }

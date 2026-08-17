@@ -5,7 +5,11 @@ import type {
   CreatePrendaDTO,
   UpdatePrendaDTO,
 } from "../../domain/entities";
-import type { PrendaRepository, PrendaFilters } from "../../domain/ports";
+import type {
+  PrendaRepository,
+  PrendaFilters,
+  InventarioSummaryItem,
+} from "../../domain/ports";
 import { PrendaMapper } from "../mappers";
 import type { PrendaRow } from "../mappers";
 
@@ -192,6 +196,62 @@ export class SupabasePrendaRepository implements PrendaRepository {
 
     const maxNumber = Math.max(...numbers);
     return maxNumber + 1;
+  }
+
+  async getSummary(): Promise<InventarioSummaryItem[]> {
+    const { data, error } = await this.supabase.rpc("get_inventario_summary");
+
+    if (error) {
+      // Fallback: hacer la agrupación en cliente si la función RPC no existe
+      const { data: allPrendas, error: fallbackError } = await this.supabase
+        .from("prendas")
+        .select("cuadro_id, genero, nombre");
+
+      if (fallbackError) {
+        throw new Error(`Error fetching summary: ${fallbackError.message}`);
+      }
+
+      const grouped = new Map<string, InventarioSummaryItem>();
+      for (const row of allPrendas as Array<{
+        cuadro_id: string;
+        genero: string;
+        nombre: string;
+      }>) {
+        const key = `${row.cuadro_id}-${row.genero}-${row.nombre}`;
+        const existing = grouped.get(key);
+        if (existing) {
+          existing.cantidad += 1;
+        } else {
+          grouped.set(key, {
+            cuadroId: row.cuadro_id,
+            genero: row.genero as Genero,
+            nombre: row.nombre,
+            cantidad: 1,
+          });
+        }
+      }
+
+      return Array.from(grouped.values()).sort((a, b) => {
+        if (a.cuadroId !== b.cuadroId)
+          return a.cuadroId.localeCompare(b.cuadroId);
+        if (a.genero !== b.genero) return a.genero.localeCompare(b.genero);
+        return a.nombre.localeCompare(b.nombre);
+      });
+    }
+
+    return (
+      data as Array<{
+        cuadro_id: string;
+        genero: string;
+        nombre: string;
+        cantidad: number;
+      }>
+    ).map((row) => ({
+      cuadroId: row.cuadro_id,
+      genero: row.genero as Genero,
+      nombre: row.nombre,
+      cantidad: row.cantidad,
+    }));
   }
 
   // --- Helpers privados ---

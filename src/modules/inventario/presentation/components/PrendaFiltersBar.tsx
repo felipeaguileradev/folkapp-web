@@ -12,9 +12,11 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import type { PrendaFilters } from "../../domain/ports";
+import type { Cuadro } from "@/modules/cuadros/domain/entities";
 
 interface PrendaFiltersBarProps {
   currentFilters: PrendaFilters;
+  cuadros: Cuadro[];
 }
 
 const GENERO_OPTIONS = ["Masculino", "Femenino", "Unisex"] as const;
@@ -36,7 +38,10 @@ const ESTADO_OPTIONS = [
 ] as const;
 const PROPIETARIO_OPTIONS = ["Ballet", "Personal"] as const;
 
-export function PrendaFiltersBar({ currentFilters }: PrendaFiltersBarProps) {
+export function PrendaFiltersBar({
+  currentFilters,
+  cuadros,
+}: PrendaFiltersBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
@@ -67,6 +72,7 @@ export function PrendaFiltersBar({ currentFilters }: PrendaFiltersBarProps) {
   };
 
   const hasActiveFilters =
+    currentFilters.cuadroId ||
     currentFilters.genero ||
     currentFilters.categoria ||
     currentFilters.estado ||
@@ -76,6 +82,25 @@ export function PrendaFiltersBar({ currentFilters }: PrendaFiltersBarProps) {
     <div
       className={`flex flex-wrap items-center gap-2 ${isPending ? "opacity-70" : ""}`}
     >
+      <Select
+        value={currentFilters.cuadroId ?? ""}
+        onValueChange={(val) =>
+          updateFilter("cuadroId", val === "all" ? undefined : val)
+        }
+      >
+        <SelectTrigger className="w-[160px]">
+          <SelectValue placeholder="Cuadro" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Todos</SelectItem>
+          {cuadros.map((cuadro) => (
+            <SelectItem key={cuadro.id} value={cuadro.id}>
+              {cuadro.nombre}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       <Select
         value={currentFilters.genero ?? ""}
         onValueChange={(val) =>

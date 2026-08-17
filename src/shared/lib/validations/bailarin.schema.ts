@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createBailarinSchema = z.object({
   nombreCompleto: z.string().min(1).max(100),
   genero: z.enum(["Masculino", "Femenino"]),
-  cuadrosActivos: z.array(z.string().uuid()).min(1).max(3),
+  cuadrosActivos: z.array(z.string().min(1)).max(3),
   colorNorte: z.string().nullable().optional(),
   tallas: z.object({
     camisa: z.string().nullable().optional(),

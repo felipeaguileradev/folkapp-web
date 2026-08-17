@@ -7,11 +7,11 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen p-4 gap-3.5">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="flex-1 min-w-0 bg-card rounded-[26px] flex flex-col">
         <TopBar />
-        <main className="flex-1 px-6 pb-6">{children}</main>
+        <main className="flex-1 px-7 pb-6 overflow-auto">{children}</main>
       </div>
     </div>
   );

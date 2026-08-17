@@ -17,6 +17,7 @@ interface BailarinesContentProps {
   totalPages: number;
   pageSize: number;
   filters: BailarinFilters;
+  cuadrosMap: Record<string, string>;
 }
 
 export function BailarinesContent({
@@ -26,9 +27,17 @@ export function BailarinesContent({
   totalPages,
   pageSize,
   filters,
+  cuadrosMap,
 }: BailarinesContentProps) {
   const router = useRouter();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  const cuadrosDisponibles = Object.entries(cuadrosMap ?? {}).map(
+    ([id, name]) => ({
+      id,
+      name,
+    }),
+  );
 
   const handleCreateSuccess = () => {
     setIsCreateDialogOpen(false);
@@ -36,17 +45,22 @@ export function BailarinesContent({
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Bailarines</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-[30px] font-bold tracking-tight font-display">
+            Bailarines
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
             {total} {total === 1 ? "bailarín" : "bailarines"} registrados
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+        <Button
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="bg-primary text-white font-bold text-[13px] px-[18px] py-3 h-auto rounded-[14px] gap-1.5"
+        >
+          <Plus className="h-[19px] w-[19px]" />
           Nuevo bailarín
         </Button>
       </div>
@@ -55,7 +69,7 @@ export function BailarinesContent({
       <BailarinFiltersBar currentFilters={filters} />
 
       {/* List */}
-      <BailarinList bailarines={bailarines} />
+      <BailarinList bailarines={bailarines} cuadrosMap={cuadrosMap} />
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -71,6 +85,7 @@ export function BailarinesContent({
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onSuccess={handleCreateSuccess}
+        cuadrosDisponibles={cuadrosDisponibles}
       />
     </div>
   );

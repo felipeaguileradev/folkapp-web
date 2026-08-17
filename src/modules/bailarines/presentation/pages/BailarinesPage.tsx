@@ -1,5 +1,6 @@
 import { createClient } from "@/shared/lib/supabase/server";
 import { SupabaseBailarinRepository } from "../../infrastructure/repositories/supabase-bailarin.repository";
+import { SupabaseCuadroRepository } from "@/modules/cuadros/infrastructure/repositories/supabase-cuadro.repository";
 import { BailarinesContent } from "../components/BailarinesContent";
 import type { BailarinFilters } from "../../domain";
 import type { Pagination } from "@/shared/types";
@@ -32,6 +33,18 @@ export async function BailarinesPage({ searchParams }: BailarinesPageProps) {
   const pagination: Pagination = { page, pageSize };
   const result = await repository.findAll(filters, pagination);
 
+  // Cargar cuadros para resolver nombres
+  let cuadrosMap: Record<string, string> = {};
+  try {
+    const cuadroRepository = new SupabaseCuadroRepository();
+    const cuadros = await cuadroRepository.findAll();
+    for (const cuadro of cuadros) {
+      cuadrosMap[cuadro.id] = cuadro.nombre;
+    }
+  } catch {
+    // Si falla la carga de cuadros, continuar con mapa vacío
+  }
+
   return (
     <BailarinesContent
       bailarines={result.data}
@@ -40,6 +53,7 @@ export async function BailarinesPage({ searchParams }: BailarinesPageProps) {
       totalPages={result.totalPages}
       pageSize={result.pageSize}
       filters={filters}
+      cuadrosMap={cuadrosMap}
     />
   );
 }

@@ -1,81 +1,68 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Download, Loader2 } from "lucide-react";
+import {
+  TableProperties,
+  ArrowLeftRight,
+  ClipboardCheck,
+  Download,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/shared/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
-import { Label } from "@/shared/components/ui/label";
 
-type ReportType =
-  | "inventario"
-  | "lista-compras"
-  | "ficha-bailarin"
-  | "estado-cuadro";
+type ReportType = "inventario" | "movimientos" | "verificacion";
 
-const REPORT_OPTIONS: {
-  value: ReportType;
-  label: string;
-  description: string;
-}[] = [
+const REPORT_CARDS = [
   {
-    value: "inventario",
-    label: "Reporte de Inventario",
-    description: "Listado completo de prendas con filtros",
+    type: "inventario" as ReportType,
+    title: "Inventario completo",
+    description: "Todas las prendas con estado, cuadro y propietario.",
+    icon: TableProperties,
+    iconBg: "bg-emerald-100 text-emerald-600",
   },
   {
-    value: "lista-compras",
-    label: "Lista de Compras",
-    description: "Prendas faltantes agrupadas por cuadro",
+    type: "movimientos" as ReportType,
+    title: "Movimientos del mes",
+    description: "Asignaciones, préstamos y traspasos con fechas.",
+    icon: ArrowLeftRight,
+    iconBg: "bg-blue-100 text-blue-600",
   },
   {
-    value: "ficha-bailarin",
-    label: "Ficha de Bailarín",
-    description: "Nombre, tallas y vestuario asignado",
-  },
-  {
-    value: "estado-cuadro",
-    label: "Estado de Cuadro",
-    description: "Completitud, alertas y prendas en reparación",
+    type: "verificacion" as ReportType,
+    title: "Verificación por función",
+    description: "Estado del checklist de vestuario por evento.",
+    icon: ClipboardCheck,
+    iconBg: "bg-orange-100 text-cuadro-huaso",
   },
 ];
 
 export function ReportesContent() {
-  const [selectedReport, setSelectedReport] = useState<ReportType | "">("");
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleGeneratePdf = async () => {
-    if (!selectedReport) return;
-    setIsGenerating(true);
+  const handleGenerate = async (tipo: ReportType, format: "pdf" | "excel") => {
+    const key = `${tipo}-${format}`;
+    setIsGenerating(key);
     setError(null);
 
     try {
-      const params = new URLSearchParams({ tipo: selectedReport });
-      const response = await fetch(`/api/reportes/pdf?${params.toString()}`);
+      const params = new URLSearchParams({ tipo });
+      const response = await fetch(
+        `/api/reportes/${format}?${params.toString()}`,
+      );
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Error al generar PDF");
+        throw new Error(
+          data.error || `Error al generar ${format.toUpperCase()}`,
+        );
       }
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `reporte-${selectedReport}.pdf`;
+      link.download = `reporte-${tipo}.${format === "pdf" ? "pdf" : "xlsx"}`;
       link.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -85,144 +72,93 @@ export function ReportesContent() {
           : "Error al generar el reporte. Intenta de nuevo.",
       );
     } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleGenerateExcel = async () => {
-    if (!selectedReport) return;
-    setIsGenerating(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({ tipo: selectedReport });
-      const response = await fetch(`/api/reportes/excel?${params.toString()}`);
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Error al generar Excel");
-      }
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `reporte-${selectedReport}.xlsx`;
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Error al generar el reporte. Intenta de nuevo.",
-      );
-    } finally {
-      setIsGenerating(false);
+      setIsGenerating(null);
     }
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Reportes</h1>
-        <p className="text-muted-foreground">
-          Genera y exporta reportes del inventario de vestuario
+        <h1 className="text-[30px] font-bold tracking-tight font-display">
+          Reportes
+        </h1>
+        <p className="text-[13px] text-muted-foreground mt-0.5">
+          Genera reportes para auditoría y control
         </p>
       </div>
 
-      {/* Report selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Tipo de reporte</CardTitle>
-          <CardDescription>
-            Selecciona el tipo de reporte que deseas generar
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Reporte</Label>
-            <Select
-              value={selectedReport}
-              onValueChange={(val) => setSelectedReport(val as ReportType)}
+      {/* Error */}
+      {error && (
+        <div className="rounded-[14px] bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      {/* Report Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        {REPORT_CARDS.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={card.type}
+              className="border border-border rounded-2xl p-5"
             >
-              <SelectTrigger className="w-full max-w-sm">
-                <SelectValue placeholder="Seleccionar tipo de reporte" />
-              </SelectTrigger>
-              <SelectContent>
-                {REPORT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedReport && (
-            <p className="text-sm text-muted-foreground">
-              {
-                REPORT_OPTIONS.find((o) => o.value === selectedReport)
-                  ?.description
-              }
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Export buttons */}
-      {selectedReport && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Exportar</CardTitle>
-            <CardDescription>
-              Descarga el reporte en el formato deseado
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">
-                {error}
+              <div
+                className={`w-[42px] h-[42px] rounded-[13px] flex items-center justify-center mb-3.5 ${card.iconBg}`}
+              >
+                <Icon className="h-[22px] w-[22px]" />
+              </div>
+              <h3 className="text-[15px] font-bold">{card.title}</h3>
+              <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">
+                {card.description}
+              </p>
+              <div className="flex gap-2 mt-3.5">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2"
-                  onClick={() => setError(null)}
+                  onClick={() => handleGenerate(card.type, "pdf")}
+                  disabled={isGenerating !== null}
+                  className="flex-1 bg-sidebar text-white font-bold text-xs py-2.5 h-auto rounded-[10px]"
                 >
-                  Reintentar
+                  {isGenerating === `${card.type}-pdf` ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    "PDF"
+                  )}
+                </Button>
+                <Button
+                  onClick={() => handleGenerate(card.type, "excel")}
+                  disabled={isGenerating !== null}
+                  variant="outline"
+                  className="flex-1 font-bold text-xs py-2.5 h-auto rounded-[10px]"
+                >
+                  {isGenerating === `${card.type}-excel` ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    "Excel"
+                  )}
                 </Button>
               </div>
-            )}
-
-            <div className="flex flex-wrap gap-3">
-              <Button
-                onClick={handleGeneratePdf}
-                disabled={isGenerating}
-                variant="outline"
-              >
-                {isGenerating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <FileText className="mr-2 h-4 w-4" />
-                )}
-                Descargar PDF
-              </Button>
-              <Button
-                onClick={handleGenerateExcel}
-                disabled={isGenerating}
-                variant="outline"
-              >
-                {isGenerating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="mr-2 h-4 w-4" />
-                )}
-                Descargar Excel
-              </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          );
+        })}
+      </div>
+
+      {/* Recent reports section - placeholder */}
+      <div>
+        <h3 className="text-[15px] font-bold font-display mb-3">
+          Reportes recientes
+        </h3>
+        <div className="border border-border rounded-2xl overflow-hidden">
+          <div className="flex items-center gap-3.5 px-[18px] py-3.5 text-muted-foreground">
+            <div className="w-9 h-9 rounded-[11px] bg-secondary flex items-center justify-center shrink-0">
+              <Download className="h-[19px] w-[19px]" />
+            </div>
+            <p className="text-[13px]">
+              Los reportes generados aparecerán aquí
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

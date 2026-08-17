@@ -12,6 +12,18 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Separator } from "@/shared/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
+import { toast } from "@/shared/hooks/useToast";
 import type { Cuadro, PlantillaItem } from "../../domain/entities";
 import { eliminarCuadroAction } from "../../infrastructure/actions";
 import { CuadroBadge } from "./CuadroBadge";
@@ -34,15 +46,17 @@ export function CuadroDetail({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("¿Estás seguro de que deseas eliminar este cuadro?")) return;
-
     setIsDeleting(true);
     const result = await eliminarCuadroAction(cuadro.id);
 
     if (result.success) {
       router.push("/cuadros");
     } else {
-      alert(result.error);
+      toast({
+        variant: "destructive",
+        title: "Error al eliminar",
+        description: result.error,
+      });
       setIsDeleting(false);
     }
   };
@@ -85,15 +99,33 @@ export function CuadroDetail({
               <Edit className="mr-2 h-4 w-4" />
               Editar
             </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              {isDeleting ? "Eliminando..." : "Eliminar"}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" disabled={isDeleting}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {isDeleting ? "Eliminando..." : "Eliminar"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar este cuadro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminará
+                    permanentemente el cuadro{" "}
+                    <span className="font-medium">{cuadro.nombre}</span>.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {isDeleting ? "Eliminando..." : "Eliminar"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardHeader>
         {cuadro.descripcion && (

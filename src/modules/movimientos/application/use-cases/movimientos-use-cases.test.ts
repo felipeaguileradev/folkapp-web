@@ -76,20 +76,19 @@ function createMockPrendaRepository(
 ): PrendaRepository {
   return {
     findById: vi.fn().mockResolvedValue(null),
-    findAll: vi
-      .fn()
-      .mockResolvedValue({
-        data: [],
-        total: 0,
-        page: 1,
-        pageSize: 10,
-        totalPages: 0,
-      }),
+    findAll: vi.fn().mockResolvedValue({
+      data: [],
+      total: 0,
+      page: 1,
+      pageSize: 10,
+      totalPages: 0,
+    }),
     search: vi.fn().mockResolvedValue([]),
     create: vi.fn().mockResolvedValue(createMockPrenda()),
     update: vi.fn().mockResolvedValue(createMockPrenda()),
     delete: vi.fn().mockResolvedValue(undefined),
     getNextSequentialNumber: vi.fn().mockResolvedValue(1),
+    getSummary: vi.fn().mockResolvedValue([]),
     ...overrides,
   };
 }

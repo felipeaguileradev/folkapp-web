@@ -15,6 +15,7 @@ interface BailarinFormDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
   bailarin?: Bailarin;
+  cuadrosDisponibles: { id: string; name: string }[];
 }
 
 export function BailarinFormDialog({
@@ -22,6 +23,7 @@ export function BailarinFormDialog({
   onOpenChange,
   onSuccess,
   bailarin,
+  cuadrosDisponibles,
 }: BailarinFormDialogProps) {
   const isEditing = !!bailarin;
 
@@ -38,7 +40,11 @@ export function BailarinFormDialog({
               : "Completa los datos para registrar un nuevo bailarín"}
           </DialogDescription>
         </DialogHeader>
-        <BailarinForm bailarin={bailarin} onSuccess={onSuccess} />
+        <BailarinForm
+          bailarin={bailarin}
+          cuadrosDisponibles={cuadrosDisponibles}
+          onSuccess={onSuccess}
+        />
       </DialogContent>
     </Dialog>
   );

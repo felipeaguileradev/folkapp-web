@@ -81,6 +81,7 @@ function createMockPrendaRepo(prendas: Prenda[]): PrendaRepository {
     update: async () => prendas[0],
     delete: async () => {},
     getNextSequentialNumber: async () => 1,
+    getSummary: async () => [],
   };
 }
 

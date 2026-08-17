@@ -2,22 +2,23 @@
 
 import Link from "next/link";
 import { User, Users } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
-import { cn } from "@/lib/utils";
 import type { Bailarin } from "../../domain";
-import { ColorNorteBadge } from "./ColorNorteBadge";
 
 interface BailarinListProps {
   bailarines: Bailarin[];
+  cuadrosMap: Record<string, string>;
 }
 
-export function BailarinList({ bailarines }: BailarinListProps) {
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+export function BailarinList({ bailarines, cuadrosMap }: BailarinListProps) {
   if (bailarines.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -33,41 +34,64 @@ export function BailarinList({ bailarines }: BailarinListProps) {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
       {bailarines.map((bailarin) => (
-        <Link key={bailarin.id} href={`/bailarines/${bailarin.id}`}>
-          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-base leading-tight">
-                  {bailarin.nombreCompleto}
-                </CardTitle>
-                {!bailarin.activo && (
-                  <Badge variant="secondary" className="text-xs">
-                    Inactivo
-                  </Badge>
-                )}
+        <Link
+          key={bailarin.id}
+          href={`/bailarines/${bailarin.id}`}
+          className="border border-border rounded-2xl p-[18px] hover:shadow-md transition-shadow"
+        >
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-3.5">
+            <div className="w-11 h-11 rounded-[13px] bg-sidebar text-white flex items-center justify-center font-bold text-sm shrink-0">
+              {getInitials(bailarin.nombreCompleto)}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[15px] font-bold truncate">
+                {bailarin.nombreCompleto}
+              </p>
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                <User className="h-3.5 w-3.5" />
+                {bailarin.genero}
               </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
-                <span>{bailarin.genero}</span>
-              </div>
+            </div>
+            <span
+              className={`ml-auto w-2 h-2 rounded-full shrink-0 ${
+                bailarin.activo ? "bg-emerald-600" : "bg-slate-400"
+              }`}
+            />
+          </div>
 
-              <div className="flex flex-wrap gap-1">
-                {bailarin.cuadrosActivos.map((cuadroId) => (
-                  <Badge key={cuadroId} variant="outline" className="text-xs">
-                    {cuadroId}
-                  </Badge>
-                ))}
-              </div>
+          {/* Tallas */}
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {bailarin.tallas.camisa && (
+              <span className="text-[11px] font-semibold text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
+                Camisa {bailarin.tallas.camisa}
+              </span>
+            )}
+            {bailarin.tallas.pantalon && (
+              <span className="text-[11px] font-semibold text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
+                Pant. {bailarin.tallas.pantalon}
+              </span>
+            )}
+            {bailarin.tallas.calzado && (
+              <span className="text-[11px] font-semibold text-muted-foreground bg-secondary px-2.5 py-1 rounded-lg">
+                Calzado {bailarin.tallas.calzado}
+              </span>
+            )}
+          </div>
 
-              {bailarin.colorNorte && (
-                <ColorNorteBadge color={bailarin.colorNorte} />
-              )}
-            </CardContent>
-          </Card>
+          {/* Cuadros */}
+          <div className="flex flex-wrap gap-1.5">
+            {bailarin.cuadrosActivos.map((cuadroId) => (
+              <span
+                key={cuadroId}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground border border-border px-2.5 py-1 rounded-full"
+              >
+                {cuadrosMap[cuadroId] ?? cuadroId}
+              </span>
+            ))}
+          </div>
         </Link>
       ))}
     </div>

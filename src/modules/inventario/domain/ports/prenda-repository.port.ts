@@ -21,6 +21,14 @@ export interface PrendaFilters {
   propietario?: Propietario;
 }
 
+/** Ítem del resumen de inventario agrupado */
+export interface InventarioSummaryItem {
+  cuadroId: string;
+  genero: Genero;
+  nombre: string;
+  cantidad: number;
+}
+
 /** Puerto del repositorio de prendas (contrato para la capa de infraestructura) */
 export interface PrendaRepository {
   findById(id: string): Promise<Prenda | null>;
@@ -33,4 +41,5 @@ export interface PrendaRepository {
   update(id: string, data: UpdatePrendaDTO): Promise<Prenda>;
   delete(id: string): Promise<void>;
   getNextSequentialNumber(genero: Genero, cuadro: string): Promise<number>;
+  getSummary(): Promise<InventarioSummaryItem[]>;
 }

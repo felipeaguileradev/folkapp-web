@@ -1,32 +1,58 @@
 "use client";
 
-import { ArrowLeftRight, Clock, AlertTriangle } from "lucide-react";
+import { useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/components/ui/table";
+  ArrowLeftRight,
+  Clock,
+  AlertTriangle,
+  ArrowRight,
+  UserCheck,
+} from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Movimiento } from "../../domain/entities";
 import type { TipoMovimiento } from "@/shared/types";
 import { DevolucionDialog } from "./DevolucionDialog";
-import { useState } from "react";
 
 interface MovimientoListProps {
   movimientos: Movimiento[];
 }
 
-const TIPO_STYLES: Record<TipoMovimiento, string> = {
-  Asignación: "bg-blue-100 text-blue-800 border-blue-200",
-  "Préstamo interno": "bg-purple-100 text-purple-800 border-purple-200",
-  "Préstamo externo": "bg-orange-100 text-orange-800 border-orange-200",
-  Devolución: "bg-green-100 text-green-800 border-green-200",
-  Traspaso: "bg-cyan-100 text-cyan-800 border-cyan-200",
+const TIPO_CONFIG: Record<
+  TipoMovimiento,
+  { icon: typeof Clock; bg: string; badgeBg: string; badgeColor: string }
+> = {
+  "Préstamo interno": {
+    icon: Clock,
+    bg: "bg-blue-100 text-blue-600",
+    badgeBg: "bg-blue-100",
+    badgeColor: "text-blue-700",
+  },
+  "Préstamo externo": {
+    icon: Clock,
+    bg: "bg-blue-100 text-blue-600",
+    badgeBg: "bg-blue-100",
+    badgeColor: "text-blue-700",
+  },
+  Asignación: {
+    icon: UserCheck,
+    bg: "bg-emerald-100 text-emerald-600",
+    badgeBg: "bg-emerald-100",
+    badgeColor: "text-emerald-700",
+  },
+  Traspaso: {
+    icon: ArrowLeftRight,
+    bg: "bg-orange-100 text-cuadro-huaso",
+    badgeBg: "bg-orange-100",
+    badgeColor: "text-cuadro-huaso",
+  },
+  Devolución: {
+    icon: ArrowLeftRight,
+    bg: "bg-slate-100 text-slate-600",
+    badgeBg: "bg-slate-100",
+    badgeColor: "text-slate-700",
+  },
 };
 
 function isOverdue(movimiento: Movimiento): boolean {
@@ -56,108 +82,111 @@ export function MovimientoList({ movimientos }: MovimientoListProps) {
 
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Prenda</TableHead>
-            <TableHead>Bailarín</TableHead>
-            <TableHead>Fecha</TableHead>
-            <TableHead>Devolución esperada</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {movimientos.map((movimiento) => {
-            const overdue = isOverdue(movimiento);
-            return (
-              <TableRow
-                key={movimiento.id}
-                className={overdue ? "bg-red-50" : ""}
+      <div className="flex flex-col gap-2.5">
+        {movimientos.map((movimiento) => {
+          const overdue = isOverdue(movimiento);
+          const config = TIPO_CONFIG[movimiento.tipo];
+          const Icon = config.icon;
+
+          return (
+            <div
+              key={movimiento.id}
+              className={cn(
+                "border border-border rounded-2xl px-[18px] py-4 flex items-center gap-4",
+                overdue && "border-red-200 bg-red-50/50",
+              )}
+            >
+              {/* Icon */}
+              <div
+                className={`w-11 h-11 rounded-[13px] flex items-center justify-center shrink-0 ${config.bg}`}
               >
-                <TableCell>
+                <Icon className="h-[22px] w-[22px]" />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-sm font-bold truncate">
+                    {movimiento.prendaId.slice(0, 8)}…
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground mt-0.5">
+                  <span className="truncate">
+                    {movimiento.bailarinId.slice(0, 8)}…
+                  </span>
+                  {movimiento.bailarinDestinoId && (
+                    <>
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">
+                        {movimiento.bailarinDestinoId.slice(0, 8)}…
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Tipo + fecha */}
+              <div className="text-right shrink-0">
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "text-[11px] font-bold border-0",
+                    config.badgeBg,
+                    config.badgeColor,
+                  )}
+                >
+                  {movimiento.tipo}
+                </Badge>
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  {movimiento.fechaInicio.toLocaleDateString("es-CL", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </p>
+              </div>
+
+              {/* Estado */}
+              <div className="shrink-0 w-[110px] text-right">
+                {overdue ? (
                   <Badge
                     variant="outline"
-                    className={cn(TIPO_STYLES[movimiento.tipo])}
+                    className="text-[11px] font-bold border-0 bg-red-100 text-red-700"
                   >
-                    {movimiento.tipo}
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Vencido
                   </Badge>
-                </TableCell>
-                <TableCell className="font-mono text-sm">
-                  {movimiento.prendaId.slice(0, 8)}...
-                </TableCell>
-                <TableCell className="text-sm">
-                  {movimiento.bailarinId.slice(0, 8)}...
-                  {movimiento.bailarinDestinoId && (
-                    <span className="text-muted-foreground">
-                      {" → "}
-                      {movimiento.bailarinDestinoId.slice(0, 8)}...
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell className="text-sm">
-                  {movimiento.fechaInicio.toLocaleDateString("es-CL")}
-                </TableCell>
-                <TableCell>
-                  {movimiento.fechaDevolucionEsperada ? (
-                    <div className="flex items-center gap-1">
-                      {overdue && (
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                      )}
-                      <span
-                        className={cn(
-                          "text-sm",
-                          overdue && "text-red-600 font-medium",
-                        )}
-                      >
-                        {movimiento.fechaDevolucionEsperada.toLocaleDateString(
-                          "es-CL",
-                        )}
-                      </span>
-                      {overdue && (
-                        <Badge variant="destructive" className="text-xs ml-1">
-                          Vencido
-                        </Badge>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {movimiento.devuelta ? (
-                    <Badge
-                      variant="outline"
-                      className="bg-green-100 text-green-800 border-green-200"
-                    >
-                      Devuelta
-                    </Badge>
-                  ) : (
-                    <Badge
-                      variant="outline"
-                      className="bg-yellow-100 text-yellow-800 border-yellow-200"
-                    >
-                      Pendiente
-                    </Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {!movimiento.devuelta && movimiento.tipo !== "Traspaso" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setDevolucionMovimientoId(movimiento.id)}
-                    >
-                      Devolver
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                ) : movimiento.devuelta ? (
+                  <Badge
+                    variant="outline"
+                    className="text-[11px] font-bold border-0 bg-secondary text-muted-foreground"
+                  >
+                    Devuelto
+                  </Badge>
+                ) : (
+                  <Badge
+                    variant="outline"
+                    className="text-[11px] font-bold border-0 bg-blue-100 text-blue-700"
+                  >
+                    Activo
+                  </Badge>
+                )}
+              </div>
+
+              {/* Action */}
+              {!movimiento.devuelta && movimiento.tipo !== "Traspaso" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 text-[12.5px] font-bold rounded-[11px] h-auto py-2.5 px-3.5"
+                  onClick={() => setDevolucionMovimientoId(movimiento.id)}
+                >
+                  Devolver
+                </Button>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
       <DevolucionDialog
         movimientoId={devolucionMovimientoId}

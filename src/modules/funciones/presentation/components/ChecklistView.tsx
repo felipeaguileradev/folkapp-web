@@ -19,7 +19,19 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { toast } from "@/shared/hooks/useToast";
 import type { Funcion, ChecklistItem } from "../../domain/entities";
 import type { EstadoVerificacion } from "@/shared/types";
 import {
@@ -71,18 +83,15 @@ export function ChecklistView({ funcion, items }: ChecklistViewProps) {
   };
 
   const handleFinalizar = async () => {
-    if (
-      !confirm(
-        "¿Estás seguro de finalizar esta función? No se podrán hacer más cambios.",
-      )
-    )
-      return;
-
     setIsFinalizing(true);
     const result = await finalizarFuncionAction(funcion.id);
 
     if (!result.success) {
-      alert(result.error);
+      toast({
+        variant: "destructive",
+        title: "Error al finalizar",
+        description: result.error,
+      });
     }
 
     setIsFinalizing(false);
@@ -121,10 +130,29 @@ export function ChecklistView({ funcion, items }: ChecklistViewProps) {
             </div>
           </div>
           {!isFinalized && (
-            <Button onClick={handleFinalizar} disabled={isFinalizing}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              {isFinalizing ? "Finalizando..." : "Finalizar función"}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button disabled={isFinalizing}>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  {isFinalizing ? "Finalizando..." : "Finalizar función"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Finalizar esta función?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Una vez finalizada, no se
+                    podrán hacer más cambios en la función.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleFinalizar}>
+                    {isFinalizing ? "Finalizando..." : "Finalizar"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </CardHeader>
         <CardContent>

@@ -98,6 +98,7 @@ function createMockRepository(prendas: Prenda[]): PrendaRepository {
     update: async (id, data) => createMockPrenda({ id, ...data }),
     delete: async () => {},
     getNextSequentialNumber: async () => 1,
+    getSummary: async () => [],
   };
 }
 

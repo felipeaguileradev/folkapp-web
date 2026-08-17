@@ -5,12 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, Calendar, MapPin } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Funcion } from "../../domain/entities";
@@ -37,18 +31,22 @@ export function FuncionesContent({ funciones }: FuncionesContentProps) {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Funciones</h1>
-          <p className="text-muted-foreground">
-            {funciones.length}{" "}
-            {funciones.length === 1 ? "función" : "funciones"} registradas
+          <h1 className="text-[30px] font-bold tracking-tight font-display">
+            Funciones
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
+            Eventos y verificación de vestuario
           </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+        <Button
+          onClick={() => setIsCreateOpen(true)}
+          className="bg-primary text-white font-bold text-[13px] px-[18px] py-3 h-auto rounded-[14px] gap-1.5"
+        >
+          <Plus className="h-[19px] w-[19px]" />
           Nueva función
         </Button>
       </div>
@@ -62,44 +60,73 @@ export function FuncionesContent({ funciones }: FuncionesContentProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {funciones.map((funcion) => (
-            <Link key={funcion.id} href={`/funciones/${funcion.id}`}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="flex items-center justify-between py-4">
-                  <div className="space-y-1">
-                    <p className="font-medium">{funcion.nombre}</p>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {funcion.fecha.toLocaleDateString("es-CL")}
-                      </span>
-                      {funcion.lugar && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {funcion.lugar}
-                        </span>
-                      )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          {funciones.map((funcion) => {
+            const pct = funcion.resultadoChecklist
+              ? Math.round(
+                  (funcion.resultadoChecklist.verificados /
+                    funcion.resultadoChecklist.totalItems) *
+                    100,
+                )
+              : 0;
+            const barColor =
+              pct >= 80
+                ? "bg-emerald-600"
+                : pct >= 50
+                  ? "bg-primary"
+                  : "bg-amber-600";
+
+            return (
+              <Link
+                key={funcion.id}
+                href={`/funciones/${funcion.id}`}
+                className="border border-border rounded-2xl p-[18px] hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between">
+                  <p className="text-base font-bold">{funcion.nombre}</p>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-[11px] shrink-0",
+                      ESTADO_STYLES[funcion.estado],
+                    )}
+                  >
+                    {funcion.estado}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-3.5 text-[12.5px] text-muted-foreground mt-2">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-[15px] w-[15px]" />
+                    {funcion.fecha.toLocaleDateString("es-CL", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </span>
+                  {funcion.lugar && (
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-[15px] w-[15px]" />
+                      {funcion.lugar}
+                    </span>
+                  )}
+                </div>
+                {funcion.resultadoChecklist && (
+                  <div className="mt-3.5">
+                    <div className="flex justify-between text-[11.5px] text-muted-foreground mb-1.5">
+                      <span>Checklist de vestuario</span>
+                      <b className="text-foreground">{pct}%</b>
+                    </div>
+                    <div className="h-[7px] bg-secondary rounded overflow-hidden">
+                      <div
+                        className={`h-full rounded ${barColor}`}
+                        style={{ width: `${pct}%` }}
+                      />
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {funcion.resultadoChecklist && (
-                      <span className="text-sm text-muted-foreground">
-                        {funcion.resultadoChecklist.verificados}/
-                        {funcion.resultadoChecklist.totalItems} verificados
-                      </span>
-                    )}
-                    <Badge
-                      variant="outline"
-                      className={cn(ESTADO_STYLES[funcion.estado])}
-                    >
-                      {funcion.estado}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                )}
+              </Link>
+            );
+          })}
         </div>
       )}
 

@@ -1,5 +1,6 @@
 import { createClient } from "@/shared/lib/supabase/server";
 import { SupabasePrendaRepository } from "../../infrastructure/repositories";
+import { SupabaseCuadroRepository } from "@/modules/cuadros/infrastructure/repositories";
 import { InventarioContent } from "../components/InventarioContent";
 import type { PrendaFilters } from "../../domain/ports";
 import type { Pagination } from "@/shared/types";
@@ -19,6 +20,7 @@ interface InventarioPageProps {
 export async function InventarioPage({ searchParams }: InventarioPageProps) {
   const supabase = createClient();
   const repository = new SupabasePrendaRepository(supabase);
+  const cuadroRepository = new SupabaseCuadroRepository();
 
   const page = Number(searchParams?.page) || 1;
   const pageSize = 10;
@@ -38,7 +40,12 @@ export async function InventarioPage({ searchParams }: InventarioPageProps) {
   const pagination: Pagination = { page, pageSize };
 
   // Si hay búsqueda, usar search; si no, usar findAll con paginación
-  const searchQuery = searchParams?.q ?? "";
+  const searchQuery = (searchParams?.q ?? "").trim();
+
+  const [cuadros, summary] = await Promise.all([
+    cuadroRepository.findAll(),
+    repository.getSummary(),
+  ]);
 
   if (searchQuery.length >= 2) {
     const results = await repository.search(searchQuery, filters);
@@ -51,6 +58,8 @@ export async function InventarioPage({ searchParams }: InventarioPageProps) {
         pageSize={pageSize}
         filters={filters}
         searchQuery={searchQuery}
+        cuadros={cuadros}
+        summary={summary}
       />
     );
   }
@@ -66,6 +75,8 @@ export async function InventarioPage({ searchParams }: InventarioPageProps) {
       pageSize={result.pageSize}
       filters={filters}
       searchQuery={searchQuery}
+      cuadros={cuadros}
+      summary={summary}
     />
   );
 }

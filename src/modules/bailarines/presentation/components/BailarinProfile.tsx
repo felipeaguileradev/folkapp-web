@@ -20,6 +20,7 @@ import {
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
+import { toast } from "@/shared/hooks/useToast";
 import type { Bailarin } from "../../domain";
 import { toggleActivoAction } from "../../infrastructure/actions";
 import { BailarinFormDialog } from "./BailarinFormDialog";
@@ -28,9 +29,13 @@ import { TallasSection } from "./TallasSection";
 
 interface BailarinProfileProps {
   bailarin: Bailarin;
+  cuadrosMap: Record<string, string>;
 }
 
-export function BailarinProfile({ bailarin }: BailarinProfileProps) {
+export function BailarinProfile({
+  bailarin,
+  cuadrosMap,
+}: BailarinProfileProps) {
   const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
@@ -42,7 +47,11 @@ export function BailarinProfile({ bailarin }: BailarinProfileProps) {
     if (result.success) {
       router.refresh();
     } else {
-      alert(result.error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: result.error,
+      });
     }
     setIsToggling(false);
   };
@@ -111,7 +120,7 @@ export function BailarinProfile({ bailarin }: BailarinProfileProps) {
               </Badge>
               {bailarin.cuadrosActivos.map((cuadroId) => (
                 <Badge key={cuadroId} variant="outline">
-                  {cuadroId}
+                  {(cuadrosMap ?? {})[cuadroId] ?? cuadroId}
                 </Badge>
               ))}
               {bailarin.colorNorte && (
@@ -180,6 +189,12 @@ export function BailarinProfile({ bailarin }: BailarinProfileProps) {
         onOpenChange={setIsEditOpen}
         onSuccess={handleEditSuccess}
         bailarin={bailarin}
+        cuadrosDisponibles={Object.entries(cuadrosMap ?? {}).map(
+          ([id, name]) => ({
+            id,
+            name,
+          }),
+        )}
       />
     </>
   );

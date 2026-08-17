@@ -1,28 +1,44 @@
 "use client";
 
+import Link from "next/link";
 import { Search, Bell } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 
 export function TopBar() {
   return (
-    <header className="flex items-center justify-between px-6 py-4">
+    <header className="flex items-center gap-3.5 px-7 py-5">
       {/* Search */}
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="relative flex-1 max-w-[380px]">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-muted-foreground" />
         <Input
-          placeholder="Buscar..."
-          className="pl-9 bg-card border-none shadow-sm rounded-xl h-10"
+          placeholder="Buscar prenda, bailarín, cuadro…"
+          className="pl-11 bg-secondary border-none rounded-2xl h-11 text-sm placeholder:text-muted-foreground"
         />
       </div>
 
       {/* Right actions */}
-      <div className="flex items-center gap-3">
-        <button className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-card shadow-sm hover:shadow-md transition-shadow">
-          <Bell className="h-4 w-4 text-muted-foreground" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white text-xs font-semibold">
-          BF
+      <div className="ml-auto flex items-center gap-2.5">
+        {/* Notifications */}
+        <Link
+          href="/alertas"
+          className="relative flex items-center justify-center w-11 h-11 rounded-[14px] bg-sidebar text-white hover:opacity-90 transition-opacity"
+          aria-label="Ver alertas"
+        >
+          <Bell className="h-[18px] w-[18px]" />
+          <span className="absolute top-[9px] right-[9px] min-w-4 h-4 rounded-full bg-primary text-[9px] font-bold text-white flex items-center justify-center border-2 border-sidebar px-0.5">
+            2
+          </span>
+        </Link>
+
+        {/* User */}
+        <div className="flex items-center gap-2.5 pl-1">
+          <div className="w-10 h-10 rounded-[13px] bg-cuadro-huaso text-white flex items-center justify-center font-extrabold text-[13px]">
+            BF
+          </div>
+          <div className="hidden sm:block leading-tight">
+            <p className="text-[13px] font-bold">Coordinación</p>
+            <p className="text-[11px] text-muted-foreground">Administrador</p>
+          </div>
         </div>
       </div>
     </header>

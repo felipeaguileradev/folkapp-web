@@ -52,13 +52,13 @@ const NAV_ITEMS: {
     feature: "movimientos",
   },
   { href: "/cuadros", label: "Cuadros", icon: Palette, feature: "cuadros" },
-  { href: "/alertas", label: "Alertas", icon: Bell, feature: "alertas" },
   {
     href: "/funciones",
     label: "Funciones",
     icon: Calendar,
     feature: "funciones",
   },
+  { href: "/alertas", label: "Alertas", icon: Bell, feature: "alertas" },
   { href: "/reportes", label: "Reportes", icon: FileText, feature: "reportes" },
 ];
 
@@ -83,6 +83,7 @@ export function Sidebar() {
         size="sm"
         className="fixed top-4 left-4 z-50 md:hidden min-w-[44px] min-h-[44px]"
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
       >
         {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </Button>
@@ -95,23 +96,25 @@ export function Sidebar() {
         />
       )}
 
-      {/* Sidebar - Compact icon style */}
+      {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-[72px] bg-[hsl(var(--sidebar))] transform transition-transform duration-200 md:relative md:translate-x-0 flex flex-col items-center py-6 rounded-r-2xl md:rounded-2xl md:m-3",
+          "fixed inset-y-0 left-0 z-40 w-16 transform transition-transform duration-200",
+          "md:sticky md:top-0 md:h-screen md:translate-x-0",
+          "flex flex-col items-center py-4 gap-4",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Logo */}
         <Link
           href="/dashboard"
-          className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/20 mb-8"
+          className="flex items-center justify-center w-11 h-11 rounded-[14px] bg-sidebar text-white font-extrabold text-[13px] shrink-0"
         >
-          <span className="text-sm font-bold text-white">BF</span>
+          BF
         </Link>
 
         {/* Navigation */}
-        <nav className="flex-1 flex flex-col items-center gap-2">
+        <nav className="flex flex-col items-center gap-2.5 mt-1">
           {visibleNavItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -122,10 +125,10 @@ export function Sidebar() {
                 onClick={() => setIsOpen(false)}
                 title={item.label}
                 className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
+                  "flex items-center justify-center w-11 h-11 rounded-[14px] transition-all duration-200",
                   isActive
-                    ? "bg-white text-[hsl(var(--sidebar))] shadow-lg"
-                    : "text-white/70 hover:bg-white/15 hover:text-white",
+                    ? "bg-primary text-white shadow-lg"
+                    : "bg-white text-muted-foreground shadow-sm hover:shadow-md hover:text-foreground",
                 )}
               >
                 <Icon className="h-5 w-5" />
@@ -138,7 +141,8 @@ export function Sidebar() {
         <button
           onClick={handleLogout}
           title="Cerrar sesión"
-          className="flex items-center justify-center w-10 h-10 rounded-xl text-white/70 hover:bg-white/15 hover:text-white transition-colors"
+          className="mt-auto flex items-center justify-center w-11 h-11 rounded-[14px] bg-white text-muted-foreground shadow-sm hover:shadow-md hover:text-foreground transition-colors"
+          aria-label="Cerrar sesión"
         >
           <LogOut className="h-5 w-5" />
         </button>

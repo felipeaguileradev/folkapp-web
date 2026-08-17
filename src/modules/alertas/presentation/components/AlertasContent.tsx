@@ -15,16 +15,17 @@ export function AlertasContent({
   alertasResueltas,
 }: AlertasContentProps) {
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Alertas</h1>
-          <p className="text-muted-foreground">
-            {alertasActivas.length}{" "}
-            {alertasActivas.length === 1 ? "alerta activa" : "alertas activas"}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-[30px] font-bold tracking-tight font-display">
+          Alertas
+        </h1>
+        <p className="text-[13px] text-muted-foreground mt-0.5">
+          {alertasActivas.length}{" "}
+          {alertasActivas.length === 1 ? "activa" : "activas"} · resolución
+          automática al registrar el movimiento
+        </p>
       </div>
 
       {/* Active alerts */}

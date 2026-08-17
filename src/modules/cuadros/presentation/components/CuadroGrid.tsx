@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
 import type { Cuadro } from "../../domain/entities";
-import { CuadroBadge } from "./CuadroBadge";
 
 interface CuadroGridProps {
   cuadros: Cuadro[];
@@ -32,26 +25,42 @@ export function CuadroGrid({ cuadros }: CuadroGridProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {cuadros.map((cuadro) => (
-        <Link key={cuadro.id} href={`/cuadros/${cuadro.id}`}>
-          <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <CuadroBadge color={cuadro.colorUi} nombre={cuadro.nombre} />
-                <CardTitle className="text-base">{cuadro.nombre}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>{cuadro.zonaGeografica}</span>
-              </div>
-              {cuadro.descripcion && (
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {cuadro.descripcion}
-                </p>
-              )}
-            </CardContent>
-          </Card>
+        <Link
+          key={cuadro.id}
+          href={`/cuadros/${cuadro.id}`}
+          className="border border-border rounded-[20px] overflow-hidden hover:shadow-md transition-shadow"
+        >
+          {/* Color band */}
+          <div
+            className="h-[74px] relative"
+            style={{
+              backgroundColor: cuadro.colorUi,
+              backgroundImage:
+                "repeating-linear-gradient(45deg, rgba(255,255,255,.16) 0 4px, transparent 4px 9px)",
+            }}
+          >
+            {/* Chip with letter */}
+            <div
+              className="absolute left-[18px] -bottom-[22px] w-[52px] h-[52px] rounded-[15px] text-white flex items-center justify-center font-extrabold text-xl border-[3px] border-white font-display"
+              style={{ background: cuadro.colorUi }}
+            >
+              {cuadro.nombre[0]}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="px-[18px] pt-[30px] pb-[18px]">
+            <h3 className="text-[17px] font-bold">{cuadro.nombre}</h3>
+            <div className="flex items-center gap-1.5 text-[12.5px] text-muted-foreground mt-0.5">
+              <MapPin className="h-[15px] w-[15px]" />
+              {cuadro.zonaGeografica}
+            </div>
+            {cuadro.descripcion && (
+              <p className="text-[13px] text-muted-foreground/80 mt-2.5 leading-relaxed line-clamp-2">
+                {cuadro.descripcion}
+              </p>
+            )}
+          </div>
         </Link>
       ))}
     </div>

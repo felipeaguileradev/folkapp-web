@@ -1,1 +1,5 @@
-export type { PrendaRepository, PrendaFilters } from "./prenda-repository.port";
+export type {
+  PrendaRepository,
+  PrendaFilters,
+  InventarioSummaryItem,
+} from "./prenda-repository.port";

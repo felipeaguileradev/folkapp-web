@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Edit,
   Trash2,
+  Copy,
   Calendar,
   MapPin,
   Tag,
@@ -22,14 +23,28 @@ import {
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/shared/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import type { Prenda } from "../../domain/entities";
 import type { EstadoPrenda } from "@/shared/types";
+import { toast } from "@/shared/hooks/useToast";
 import { eliminarPrendaAction } from "../../infrastructure/actions";
 import { PrendaFormDialog } from "./PrendaFormDialog";
+import type { Cuadro } from "@/modules/cuadros/domain/entities";
 
 interface PrendaCardProps {
   prenda: Prenda;
+  cuadros: Cuadro[];
 }
 
 const ESTADO_STYLES: Record<EstadoPrenda, string> = {
@@ -41,27 +56,35 @@ const ESTADO_STYLES: Record<EstadoPrenda, string> = {
   "Dada de baja": "bg-gray-100 text-gray-800 border-gray-200",
 };
 
-export function PrendaCard({ prenda }: PrendaCardProps) {
+export function PrendaCard({ prenda, cuadros }: PrendaCardProps) {
   const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDuplicateOpen, setIsDuplicateOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm("¿Estás seguro de que deseas eliminar esta prenda?")) return;
-
     setIsDeleting(true);
     const result = await eliminarPrendaAction(prenda.id);
 
     if (result.success) {
       router.push("/inventario");
     } else {
-      alert(result.error);
+      toast({
+        variant: "destructive",
+        title: "Error al eliminar",
+        description: result.error,
+      });
       setIsDeleting(false);
     }
   };
 
   const handleEditSuccess = () => {
     setIsEditOpen(false);
+    router.refresh();
+  };
+
+  const handleDuplicateSuccess = () => {
+    setIsDuplicateOpen(false);
     router.refresh();
   };
 
@@ -90,20 +113,47 @@ export function PrendaCard({ prenda }: PrendaCardProps) {
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setIsDuplicateOpen(true)}
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Crear copia
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setIsEditOpen(true)}
               >
                 <Edit className="mr-2 h-4 w-4" />
                 Editar
               </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDelete}
-                disabled={isDeleting}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                {isDeleting ? "Eliminando..." : "Eliminar"}
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" disabled={isDeleting}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    {isDeleting ? "Eliminando..." : "Eliminar"}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Eliminar esta prenda?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta acción no se puede deshacer. Se eliminará
+                      permanentemente la prenda{" "}
+                      <span className="font-medium">{prenda.nombre}</span> del
+                      inventario.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {isDeleting ? "Eliminando..." : "Eliminar"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -211,6 +261,16 @@ export function PrendaCard({ prenda }: PrendaCardProps) {
         onOpenChange={setIsEditOpen}
         onSuccess={handleEditSuccess}
         prenda={prenda}
+        cuadros={cuadros}
+      />
+
+      {/* Duplicate Dialog */}
+      <PrendaFormDialog
+        open={isDuplicateOpen}
+        onOpenChange={setIsDuplicateOpen}
+        onSuccess={handleDuplicateSuccess}
+        cuadros={cuadros}
+        initialData={prenda}
       />
     </>
   );

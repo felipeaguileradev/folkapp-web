@@ -17,14 +17,15 @@ export function MovimientosContent({
   filters,
 }: MovimientosContentProps) {
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Movimientos</h1>
-          <p className="text-muted-foreground">
-            {movimientos.length}{" "}
-            {movimientos.length === 1 ? "movimiento" : "movimientos"}
+          <h1 className="text-[30px] font-bold tracking-tight font-display">
+            Movimientos
+          </h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
+            Asignaciones, préstamos y traspasos
           </p>
         </div>
       </div>

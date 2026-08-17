@@ -92,6 +92,68 @@ export async function crearPrendaAction(
   return result;
 }
 
+/** Datos individuales opcionales para cada prenda en creación masiva */
+export interface BulkItemOverride {
+  tallaONumero?: string | null;
+  identificadorFisico?: string | null;
+  color?: string | null;
+  comentarios?: string | null;
+}
+
+/**
+ * Server Action: Crear múltiples prendas idénticas (con opción de personalizar talla/identificador por unidad).
+ * Genera automáticamente códigos secuenciales para cada una.
+ */
+export async function crearPrendasMasivoAction(
+  baseData: CreatePrendaInput,
+  cuadroName: "Huaso" | "Norte" | "Rapa Nui",
+  cantidad: number,
+  overrides?: BulkItemOverride[],
+): Promise<Result<Prenda[], string>> {
+  if (cantidad < 1 || cantidad > 50) {
+    return { success: false, error: "La cantidad debe estar entre 1 y 50" };
+  }
+
+  const supabase = createClient();
+  const repository = new SupabasePrendaRepository(supabase);
+
+  const createdPrendas: Prenda[] = [];
+  const errors: string[] = [];
+
+  for (let i = 0; i < cantidad; i++) {
+    const itemOverride = overrides?.[i];
+    const itemData: CreatePrendaInput = {
+      ...baseData,
+      tallaONumero: itemOverride?.tallaONumero ?? baseData.tallaONumero,
+      identificadorFisico:
+        itemOverride?.identificadorFisico ?? baseData.identificadorFisico,
+      color: itemOverride?.color ?? baseData.color,
+      comentarios: itemOverride?.comentarios ?? baseData.comentarios,
+    };
+
+    const result = await crearPrenda(
+      { prendaRepository: repository },
+      { data: itemData, cuadroName },
+    );
+
+    if (result.success) {
+      createdPrendas.push(result.data);
+    } else {
+      errors.push(`Prenda ${i + 1}: ${result.error}`);
+    }
+  }
+
+  if (createdPrendas.length > 0) {
+    revalidatePath("/inventario");
+  }
+
+  if (errors.length > 0 && createdPrendas.length === 0) {
+    return { success: false, error: errors.join(". ") };
+  }
+
+  return { success: true, data: createdPrendas };
+}
+
 /**
  * Server Action: Actualizar una prenda existente.
  * Después de actualizar, auto-resuelve alertas si las condiciones cambiaron.
@@ -193,4 +255,44 @@ export async function buscarPrendasAction(
   const repository = new SupabasePrendaRepository(supabase);
 
   return buscarPrendas({ prendaRepository: repository }, { query, filters });
+}
+
+/**
+ * Server Action: Eliminar múltiples prendas del inventario.
+ */
+export async function eliminarPrendasMasivoAction(
+  ids: string[],
+): Promise<Result<{ deleted: number; errors: string[] }, string>> {
+  if (ids.length === 0) {
+    return {
+      success: false,
+      error: "No se seleccionaron prendas para eliminar",
+    };
+  }
+
+  const supabase = createClient();
+  const repository = new SupabasePrendaRepository(supabase);
+
+  const errors: string[] = [];
+  let deleted = 0;
+
+  for (const id of ids) {
+    const result = await eliminarPrenda(
+      { prendaRepository: repository },
+      { id },
+    );
+    if (result.success) {
+      deleted++;
+    } else {
+      errors.push(`Error al eliminar ${id}: ${result.error}`);
+    }
+  }
+
+  revalidatePath("/inventario");
+
+  if (deleted === 0) {
+    return { success: false, error: "No se pudo eliminar ninguna prenda" };
+  }
+
+  return { success: true, data: { deleted, errors } };
 }

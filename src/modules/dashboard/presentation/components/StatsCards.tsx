@@ -1,13 +1,4 @@
-import {
-  Package,
-  Users,
-  Palette,
-  Bell,
-  ArrowLeftRight,
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-} from "lucide-react";
+import { Package, Users, ArrowLeftRight, Palette } from "lucide-react";
 import type { DashboardStats } from "../../domain/entities";
 
 interface StatsCardsProps {
@@ -17,83 +8,50 @@ interface StatsCardsProps {
 export function StatsCards({ stats }: StatsCardsProps) {
   const cards = [
     {
-      title: "Total Prendas",
-      value: stats.totalPrendas.toLocaleString("es-CL"),
-      description: `${stats.prendasDisponibles} disponibles`,
+      title: "Total prendas",
+      value: stats.totalPrendas,
       icon: Package,
-      iconColor: "text-blue-600",
-      iconBg: "bg-blue-100",
+      iconBg: "bg-sidebar text-white",
     },
     {
-      title: "Bailarines Activos",
-      value: stats.bailarinesActivos.toLocaleString("es-CL"),
-      description: `${stats.totalBailarines} registrados`,
+      title: "Bailarines",
+      value: stats.bailarinesActivos,
       icon: Users,
-      iconColor: "text-emerald-600",
-      iconBg: "bg-emerald-100",
+      iconBg: "bg-sidebar text-white",
+    },
+    {
+      title: "En uso",
+      value: stats.prendasEnUso,
+      icon: ArrowLeftRight,
+      iconBg: "bg-primary text-white",
     },
     {
       title: "Cuadros",
-      value: stats.totalCuadros.toLocaleString("es-CL"),
-      description: "Cuadros de baile",
+      value: stats.totalCuadros,
       icon: Palette,
-      iconColor: "text-purple-600",
-      iconBg: "bg-purple-100",
-    },
-    {
-      title: "Alertas Activas",
-      value: stats.alertasActivas.toLocaleString("es-CL"),
-      description:
-        stats.alertasAlta > 0
-          ? `${stats.alertasAlta} de prioridad alta`
-          : "Sin alertas urgentes",
-      icon: stats.alertasAlta > 0 ? AlertTriangle : CheckCircle,
-      iconColor: stats.alertasAlta > 0 ? "text-red-600" : "text-emerald-600",
-      iconBg: stats.alertasAlta > 0 ? "bg-red-100" : "bg-emerald-100",
-    },
-    {
-      title: "Prendas en Uso",
-      value: stats.prendasEnUso.toLocaleString("es-CL"),
-      description: `${stats.prendasFaltantes} faltantes`,
-      icon: ArrowLeftRight,
-      iconColor: "text-orange-600",
-      iconBg: "bg-orange-100",
-    },
-    {
-      title: "Funciones Próximas",
-      value: stats.funcionesProximas.toLocaleString("es-CL"),
-      description: "Pendientes de realizar",
-      icon: Calendar,
-      iconColor: "text-indigo-600",
-      iconBg: "bg-indigo-100",
-    },
-    {
-      title: "Movimientos Activos",
-      value: stats.movimientosActivos.toLocaleString("es-CL"),
-      description: "Sin devolver",
-      icon: Bell,
-      iconColor: "text-amber-600",
-      iconBg: "bg-amber-100",
+      iconBg: "bg-cuadro-huaso text-white",
     },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
           <div
             key={card.title}
-            className="flex items-center gap-4 rounded-2xl bg-card p-4 shadow-sm hover:shadow-md transition-shadow"
+            className="border border-border rounded-2xl p-4 flex items-center gap-3.5"
           >
             <div
-              className={`flex items-center justify-center w-12 h-12 rounded-full ${card.iconBg} shrink-0`}
+              className={`w-[42px] h-[42px] rounded-[13px] flex items-center justify-center shrink-0 ${card.iconBg}`}
             >
-              <Icon className={`h-5 w-5 ${card.iconColor}`} />
+              <Icon className="h-[22px] w-[22px]" />
             </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-bold leading-tight">{card.value}</p>
-              <p className="text-xs text-muted-foreground truncate">
+            <div>
+              <p className="text-[22px] font-bold leading-none font-display">
+                {card.value}
+              </p>
+              <p className="text-[11.5px] text-muted-foreground mt-0.5">
                 {card.title}
               </p>
             </div>

@@ -22,7 +22,7 @@ export interface Bailarin {
   id: string;
   nombreCompleto: string; // max 100
   genero: GeneroBailarin;
-  cuadrosActivos: string[]; // 1-3 cuadro IDs
+  cuadrosActivos: string[]; // 0-3 cuadro IDs
   colorNorte: string | null;
   tallas: Tallas;
   activo: boolean;

@@ -20,23 +20,25 @@ import {
   actualizarBailarinAction,
 } from "../../infrastructure/actions";
 
+interface CuadroOption {
+  id: string;
+  name: string;
+}
+
 interface BailarinFormProps {
   bailarin?: Bailarin;
+  cuadrosDisponibles: CuadroOption[];
   onSuccess: () => void;
 }
 
 const GENERO_OPTIONS: GeneroBailarin[] = ["Masculino", "Femenino"];
-
-// Cuadros disponibles (en producción vendrían de la DB)
-const CUADROS_DISPONIBLES = [
-  { id: "huaso", name: "Huaso" },
-  { id: "norte", name: "Norte" },
-  { id: "rapa-nui", name: "Rapa Nui" },
-] as const;
-
 const MAX_CUSTOM_TALLAS = 5;
 
-export function BailarinForm({ bailarin, onSuccess }: BailarinFormProps) {
+export function BailarinForm({
+  bailarin,
+  cuadrosDisponibles,
+  onSuccess,
+}: BailarinFormProps) {
   const isEditing = !!bailarin;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,9 +51,12 @@ export function BailarinForm({ bailarin, onSuccess }: BailarinFormProps) {
   const [genero, setGenero] = useState<GeneroBailarin | "">(
     bailarin?.genero ?? "",
   );
-  const [cuadrosActivos, setCuadrosActivos] = useState<string[]>(
-    bailarin?.cuadrosActivos ?? [],
-  );
+  const [cuadrosActivos, setCuadrosActivos] = useState<string[]>(() => {
+    const ids = bailarin?.cuadrosActivos ?? [];
+    // Solo mantener IDs que existan en la lista de cuadros disponibles
+    const validIds = cuadrosDisponibles.map((c) => c.id);
+    return ids.filter((id) => validIds.includes(id));
+  });
   const [colorNorte, setColorNorte] = useState(bailarin?.colorNorte ?? "");
   const [fechaIngreso, setFechaIngreso] = useState(
     bailarin?.fechaIngreso
@@ -104,10 +109,8 @@ export function BailarinForm({ bailarin, onSuccess }: BailarinFormProps) {
     setIsSubmitting(true);
 
     try {
-      if (!nombreCompleto || !genero || cuadrosActivos.length === 0) {
-        setError(
-          "Completa todos los campos obligatorios (nombre, género, al menos 1 cuadro)",
-        );
+      if (!nombreCompleto || !genero) {
+        setError("Completa todos los campos obligatorios (nombre, género)");
         setIsSubmitting(false);
         return;
       }
@@ -206,9 +209,9 @@ export function BailarinForm({ bailarin, onSuccess }: BailarinFormProps) {
 
       {/* Cuadros */}
       <div className="space-y-2">
-        <Label>Cuadros activos * (1-3)</Label>
+        <Label>Cuadros activos (máx. 3)</Label>
         <div className="flex flex-wrap gap-2">
-          {CUADROS_DISPONIBLES.map((cuadro) => {
+          {cuadrosDisponibles.map((cuadro) => {
             const isSelected = cuadrosActivos.includes(cuadro.id);
             return (
               <Button
@@ -230,7 +233,10 @@ export function BailarinForm({ bailarin, onSuccess }: BailarinFormProps) {
       </div>
 
       {/* Color Norte (solo si Norte está seleccionado) */}
-      {cuadrosActivos.includes("norte") && (
+      {cuadrosActivos.some((id) => {
+        const cuadro = cuadrosDisponibles.find((c) => c.id === id);
+        return cuadro?.name.toLowerCase() === "norte";
+      }) && (
         <div className="space-y-2">
           <Label htmlFor="colorNorte">Color Norte</Label>
           <Input

@@ -18,6 +18,10 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-manrope)", "system-ui", "sans-serif"],
+        display: ["var(--font-space-grotesk)", "system-ui", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -27,16 +31,6 @@ const config: Config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#4f46e5",
-          600: "#4338ca",
-          700: "#3730a3",
-          800: "#312e81",
-          900: "#1e1b4b",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -62,22 +56,26 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar))",
+          foreground: "hsl(var(--sidebar-foreground))",
+        },
         // BFV Cuadro colors
         cuadro: {
           huaso: {
-            DEFAULT: "#F59E0B",
-            light: "#FEF3C7",
-            dark: "#B45309",
+            DEFAULT: "#c2410c",
+            light: "#fdeee6",
+            dark: "#9a3412",
           },
           norte: {
-            DEFAULT: "#3B82F6",
-            light: "#DBEAFE",
-            dark: "#1D4ED8",
+            DEFAULT: "#2563eb",
+            light: "#e7effe",
+            dark: "#1d4ed8",
           },
           "rapa-nui": {
-            DEFAULT: "#EC4899",
-            light: "#FCE7F3",
-            dark: "#BE185D",
+            DEFAULT: "#db2777",
+            light: "#fce7f3",
+            dark: "#be185d",
           },
         },
       },
@@ -85,6 +83,9 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "2xl": "1.125rem",
+        "3xl": "1.375rem",
+        "4xl": "1.625rem",
       },
       keyframes: {
         "accordion-down": {
