@@ -112,7 +112,7 @@ export function AsignarPrendaBailarinDialog({
     const errors: string[] = [];
     let successCount = 0;
 
-    for (const prendaId of selectedIds) {
+    for (const prendaId of Array.from(selectedIds)) {
       const result = await asignarPrendaAction({ prendaId, bailarinId });
       if (result.success) {
         successCount++;
