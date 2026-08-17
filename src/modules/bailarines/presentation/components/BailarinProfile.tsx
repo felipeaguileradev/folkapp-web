@@ -294,44 +294,71 @@ export function BailarinProfile({
                                       {prenda.codigoIdentificador}
                                     </p>
                                   </div>
-                                  <div className="flex items-center gap-2 shrink-0">
+                                  <div className="flex items-center gap-1 shrink-0">
                                     <Badge
                                       variant="secondary"
                                       className="text-xs"
                                     >
                                       {prenda.categoria}
                                     </Badge>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setDetallePrenda(prenda)}
-                                    >
-                                      <Eye className="h-4 w-4 mr-1" />
-                                      Ver
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        setTraspasoPrendaId(prenda.id)
-                                      }
-                                    >
-                                      <ArrowLeftRight className="h-4 w-4 mr-1" />
-                                      Traspasar
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        handleDesasignar(prenda.id)
-                                      }
-                                      disabled={desasignandoId === prenda.id}
-                                    >
-                                      <UserMinus className="h-4 w-4 mr-1" />
-                                      {desasignandoId === prenda.id
-                                        ? "..."
-                                        : "Desasignar"}
-                                    </Button>
+                                    <TooltipProvider delayDuration={200}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={() =>
+                                              setDetallePrenda(prenda)
+                                            }
+                                          >
+                                            <Eye className="h-4 w-4" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Ver</TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                    <TooltipProvider delayDuration={200}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={() =>
+                                              setTraspasoPrendaId(prenda.id)
+                                            }
+                                          >
+                                            <ArrowLeftRight className="h-4 w-4" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          Traspasar
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                    <TooltipProvider delayDuration={200}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8"
+                                            onClick={() =>
+                                              handleDesasignar(prenda.id)
+                                            }
+                                            disabled={
+                                              desasignandoId === prenda.id
+                                            }
+                                          >
+                                            <UserMinus className="h-4 w-4" />
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          Desasignar
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
                                   </div>
                                 </div>
                               </TooltipTrigger>
